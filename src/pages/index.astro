@@ -1,12 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
 import Work from '../components/Work.astro';
+import About from '../components/About.astro';
+import Skills from '../components/Skills.astro';
+import Contact from '../components/Contact.astro';
 ---
 
 <Base>
-  <section class="wrap section">
-    <h1 class="display">Tate Sinclair</h1>
-    <p class="measure">Software engineer. Site in progress.</p>
-  </section>
+  <Hero />
   <Work />
+  <About />
+  <Skills />
+  <Contact />
 </Base>

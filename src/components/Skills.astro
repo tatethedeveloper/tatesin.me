@@ -1,0 +1,44 @@
+---
+/**
+ * Two honest groups, no bars, no logos. If Tate decides not to fill this in,
+ * delete the component from index.astro rather than shipping placeholders.
+ */
+const groups = [
+  // TODO(tate): tools you can work in today without looking things up constantly.
+  { heading: 'Working in', items: ['TODO(tate)'] },
+  // TODO(tate): tools you are actively learning right now.
+  { heading: 'Learning', items: ['TODO(tate)'] },
+];
+---
+
+<section class="wrap section section-grid" id="skills" aria-labelledby="skills-title">
+  <div class="section-head">
+    <h2 class="h2" id="skills-title">Tools</h2>
+  </div>
+  <div class="section-body">
+    <dl class="skills">
+      {
+        groups.map((g) => (
+          <div class="skills-group">
+            <dt class="small muted">{g.heading}</dt>
+            <dd>{g.items.join(', ')}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .skills {
+    display: grid;
+    gap: 20px;
+    max-width: var(--measure);
+  }
+  .skills-group {
+    display: grid;
+    gap: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+</style>

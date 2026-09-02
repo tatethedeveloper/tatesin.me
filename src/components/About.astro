@@ -1,0 +1,31 @@
+---
+import { site } from '../lib/site';
+---
+
+<section class="wrap section section-grid" id="about" aria-labelledby="about-title">
+  <div class="section-head">
+    <h2 class="h2" id="about-title">About</h2>
+  </div>
+  <div class="section-body about-body measure">
+    {/* TODO(tate): replace these three paragraphs with your own. Plain, first person, no life story. */}
+    <p>
+      I'm a software engineer based in {site.location}, early in my career. This site went up
+      before the work did, on purpose: the list above is what I'm building and what I intend to
+      build next, and it will change as things ship.
+    </p>
+    <p>
+      TODO(tate): what you're drawn to in software. One or two sentences on the kind of problems
+      you like and why.
+    </p>
+    <p>
+      TODO(tate): what you're currently learning, and what you're working towards.
+    </p>
+  </div>
+</section>
+
+<style>
+  .about-body {
+    display: grid;
+    gap: 1em;
+  }
+</style>

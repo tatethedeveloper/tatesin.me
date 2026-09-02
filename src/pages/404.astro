@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Not found" description="That page doesn't exist." path="/404/">
+  <section class="wrap section">
+    <h1 class="display">Not found</h1>
+    <p class="measure lede">
+      There's nothing at this address. It may have moved while I was rebuilding, or the link was
+      wrong.
+    </p>
+    <ul class="options">
+      <li><a href="/">Start at the home page</a></li>
+      <li><a href="/#work">See what I'm building</a></li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .lede {
+    margin-top: 16px;
+    font-size: 1.25rem;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .options {
+    margin-top: 32px;
+    display: grid;
+    gap: 8px;
+  }
+</style>

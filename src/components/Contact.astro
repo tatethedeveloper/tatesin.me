@@ -1,0 +1,82 @@
+---
+import { site } from '../lib/site';
+---
+
+<section class="wrap section section-grid" id="contact" aria-labelledby="contact-title">
+  <div class="section-head">
+    <h2 class="h2" id="contact-title">Contact</h2>
+  </div>
+  <div class="section-body contact-body">
+    <p class="measure">
+      Email is the best way to reach me.
+    </p>
+    <div class="email-panel">
+      <a class="email mono" href={`mailto:${site.email}`}>{site.email}</a>
+      <button class="button button--quiet copy" type="button" data-email={site.email}>
+        Copy email
+      </button>
+    </div>
+    <ul class="contact-links small">
+      <li><a href={site.github} rel="me">GitHub</a></li>
+      <li><a href={site.linkedin} rel="me">LinkedIn</a></li>
+    </ul>
+    <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+  </div>
+</section>
+
+<style>
+  .contact-body {
+    display: grid;
+    gap: 24px;
+    justify-items: start;
+  }
+  .email-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    padding: 16px 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .email {
+    font-size: 1.0625rem;
+    word-break: break-all;
+  }
+  .copy {
+    min-height: 40px;
+  }
+  .copy[data-copied] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .contact-links {
+    display: flex;
+    gap: 24px;
+  }
+</style>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('button.copy');
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+  let timer = 0;
+  button?.addEventListener('click', async () => {
+    const email = button.dataset.email ?? '';
+    try {
+      await navigator.clipboard.writeText(email);
+      button.textContent = 'Copied';
+      button.setAttribute('data-copied', '');
+      if (status) status.textContent = 'Email address copied to clipboard.';
+    } catch {
+      // Clipboard can be unavailable (insecure context, permissions). Say so.
+      button.textContent = "Couldn't copy";
+      if (status) status.textContent = 'Copying failed. Select the address and copy it manually.';
+    }
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      button.textContent = 'Copy email';
+      button.removeAttribute('data-copied');
+    }, 2000);
+  });
+</script>

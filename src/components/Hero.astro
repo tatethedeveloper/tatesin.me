@@ -1,0 +1,54 @@
+---
+import { site } from '../lib/site';
+import BuildLog from './BuildLog.astro';
+---
+
+<section class="wrap hero" aria-labelledby="hero-title">
+  <div class="hero-text">
+    <h1 class="display" id="hero-title">{site.name}</h1>
+    <p class="hero-line">
+      {site.role} in {site.location}. Early career, building in the open.
+    </p>
+    <p><a class="button" href="#work">See what I'm building</a></p>
+  </div>
+  <div class="hero-figure">
+    <BuildLog />
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: 40px;
+    min-height: calc(100dvh - var(--nav-h));
+    padding-block: 48px 64px;
+    align-content: center;
+  }
+  .hero-text {
+    display: grid;
+    gap: 20px;
+    align-content: start;
+  }
+  .hero-line {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    max-width: 24ch;
+  }
+  .hero-text p:last-child {
+    margin-top: 8px;
+  }
+  @media (min-width: 1024px) {
+    .hero {
+      grid-template-columns: repeat(12, 1fr);
+      column-gap: var(--gutter);
+      align-items: center;
+      padding-block: 24px 64px;
+    }
+    .hero-text {
+      grid-column: 1 / 6;
+    }
+    .hero-figure {
+      grid-column: 6 / 13;
+    }
+  }
+</style>
