@@ -1,7 +1,174 @@
-<div class="buildlog" aria-hidden="true"></div>
+---
+/**
+ * The hero structure: this repository's commit history drawn as a lattice.
+ * The SVG is rendered at build time and is the fallback; the Three.js scene
+ * replaces it only when WebGL is available, the device is not low-powered
+ * and the visitor has not asked for reduced motion. The caption is the
+ * accessible version of both.
+ */
+import { getCommits } from '../lib/git';
+import { grow, bounds, project, uniqueNodes } from '../lib/lattice';
+
+const commits = getCommits();
+const struts = grow(commits.map((c) => c.hash));
+const { centre } = bounds(struts);
+const nodes = uniqueNodes(struts);
+
+const pts = struts.flatMap((s) => [project(s.a, centre), project(s.b, centre)]);
+const xs = pts.map((p) => p[0]);
+const ys = pts.map((p) => p[1]);
+const pad = 0.8;
+const minX = Math.min(...xs) - pad;
+const minY = Math.min(...ys) - pad;
+const w = Math.max(...xs) - minX + pad;
+const h = Math.max(...ys) - minY + pad;
+// Keep the viewBox square so the drawing is centred in the box at any width.
+const side = Math.max(w, h);
+const viewBox = `${minX - (side - w) / 2} ${minY - (side - h) / 2} ${side} ${side}`;
+const strokeW = 0.035; // lattice units, matches the scene's strut thickness
+
+const first = commits[0];
+const count = commits.length;
+const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const since = first ? dateFmt.format(new Date(first.date)) : '';
+
+const data = {
+  struts: struts.map((s) => [s.a, s.b]),
+  commits: commits.map((c) => ({ h: c.hash, s: c.subject, d: dateFmt.format(new Date(c.date)) })),
+};
+---
+
+<figure class="buildlog">
+  <div class="stage" data-stage>
+    <svg class="fallback" viewBox={viewBox} aria-hidden="true" data-fallback>
+      <g fill="none" stroke="var(--ink)" stroke-width={strokeW} stroke-linecap="round">
+        {
+          struts.map((s, i) => {
+            const [x1, y1] = project(s.a, centre);
+            const [x2, y2] = project(s.b, centre);
+            const last = i === struts.length - 1;
+            return (
+              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={last ? 'var(--accent)' : undefined} />
+            );
+          })
+        }
+      </g>
+      <g fill="var(--ink)">
+        {
+          nodes.map((p) => {
+            const [x, y] = project(p, centre);
+            return <rect x={x - 0.04} y={y - 0.04} width="0.08" height="0.08" />;
+          })
+        }
+      </g>
+    </svg>
+    <div class="tip mono" data-tip hidden aria-hidden="true"></div>
+  </div>
+  <figcaption class="caption small muted">
+    {
+      count === 0 ? (
+        <span>This site's own history will be drawn here once it has one.</span>
+      ) : (
+        <span>
+          This site's own history: {count === 1 ? 'one commit' : `${count} commits`} since {since}.
+        </span>
+      )
+    }
+    <span class="hint" data-hint hidden>Drag to orbit. Hover a strut for the commit.</span>
+  </figcaption>
+</figure>
+
+<script type="application/json" data-buildlog set:html={JSON.stringify(data)} />
+
 <style>
   .buildlog {
-    aspect-ratio: 4 / 3;
-    border: 1px dashed var(--line);
+    display: grid;
+    gap: 12px;
+  }
+  .stage {
+    position: relative;
+    aspect-ratio: 1;
+    max-height: 70vh;
+    width: 100%;
+    touch-action: pan-y;
+  }
+  .fallback {
+    width: 100%;
+    height: 100%;
+  }
+  .stage :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  .stage.dragging :global(canvas) {
+    cursor: grabbing;
+  }
+  .tip {
+    position: absolute;
+    z-index: 2;
+    max-width: 32ch;
+    padding: 6px 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--radius);
+    pointer-events: none;
+    transform: translate(12px, 12px);
+  }
+  .tip :global(span) {
+    display: block;
+  }
+  .tip :global(.when) {
+    opacity: 0.7;
+  }
+  .caption {
+    display: grid;
+    gap: 2px;
+    max-width: 40ch;
+  }
+  @media (max-width: 1023px) {
+    .stage {
+      max-height: 60vw;
+      aspect-ratio: auto;
+      height: 60vw;
+    }
   }
 </style>
+
+<script>
+  // Decide whether the scene is worth loading. Every "no" leaves the SVG.
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
+  const dataEl = document.querySelector<HTMLScriptElement>('script[data-buildlog]');
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+  const lowPower =
+    (nav.hardwareConcurrency ?? 4) <= 2 || (nav.deviceMemory ?? 4) <= 2 || nav.connection?.saveData === true;
+  const hasWebGL = (() => {
+    try {
+      const c = document.createElement('canvas');
+      return Boolean(c.getContext('webgl2') || c.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  })();
+
+  if (stage && dataEl && !reduced && !lowPower && hasWebGL) {
+    const data = JSON.parse(dataEl.textContent || '{}');
+    if (Array.isArray(data.struts) && data.struts.length > 0) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          io.disconnect();
+          import('../scripts/buildlog-scene').then(({ mount }) => mount(stage, data)).catch(() => {
+            /* SVG stays. */
+          });
+        },
+        { rootMargin: '200px' },
+      );
+      io.observe(stage);
+    }
+  }
+</script>

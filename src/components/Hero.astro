@@ -20,7 +20,6 @@ import BuildLog from './BuildLog.astro';
   .hero {
     display: grid;
     gap: 40px;
-    min-height: calc(100dvh - var(--nav-h));
     padding-block: 48px 64px;
     align-content: center;
   }
@@ -39,6 +38,7 @@ import BuildLog from './BuildLog.astro';
   }
   @media (min-width: 1024px) {
     .hero {
+      min-height: calc(100dvh - var(--nav-h));
       grid-template-columns: repeat(12, 1fr);
       column-gap: var(--gutter);
       align-items: center;

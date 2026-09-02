@@ -98,6 +98,9 @@ canvas {
   display: block;
   max-width: 100%;
 }
+[hidden] {
+  display: none !important;
+}
 button {
   font: inherit;
   color: inherit;
