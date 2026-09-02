@@ -27,3 +27,10 @@ pnpm-debug.log*
 .agents/
 .claude/skills/
 skills-lock.json
+.agents/
+.claude/
+.vscode/
+.github/
+
+# Claude MD file (not relevant to the project source code)
+CLAUDE.md

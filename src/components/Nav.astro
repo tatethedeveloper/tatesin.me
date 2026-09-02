@@ -1,0 +1,107 @@
+---
+import { site, nav } from '../lib/site';
+const isHome = Astro.url.pathname === '/';
+---
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="nav-name" href="/">{site.name}</a>
+    <nav aria-label="Primary">
+      <ul class="nav-list">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} data-section={item.id}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href={site.github} rel="me">GitHub</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: var(--nav-h);
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .nav-name {
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nav-list {
+    display: flex;
+    gap: clamp(12px, 3vw, 28px);
+    font-size: var(--text-small);
+  }
+  .nav-list a {
+    display: inline-block;
+    padding: 6px 0;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur) var(--ease);
+  }
+  .nav-list a:hover,
+  .nav-list a[aria-current='true'] {
+    border-bottom-color: var(--ink);
+  }
+  .nav-list a[aria-current='true'] {
+    border-bottom-color: var(--accent);
+  }
+</style>
+
+{
+  isHome && (
+    <script>
+      // Scroll-aware active state. One observer, no scroll listener.
+      const links = document.querySelectorAll<HTMLAnchorElement>('.nav-list a[data-section]');
+      const sections = Array.from(links)
+        .map((a) => document.getElementById(a.dataset.section!))
+        .filter((el): el is HTMLElement => el !== null);
+      const visible = new Map<Element, number>();
+      const setCurrent = () => {
+        let best: Element | null = null;
+        let bestRatio = 0;
+        for (const [el, ratio] of visible) {
+          if (ratio > bestRatio) {
+            best = el;
+            bestRatio = ratio;
+          }
+        }
+        for (const a of links) {
+          const on = best !== null && a.dataset.section === best.id;
+          if (on) a.setAttribute('aria-current', 'true');
+          else a.removeAttribute('aria-current');
+        }
+      };
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) visible.set(e.target, e.intersectionRatio);
+            else visible.delete(e.target);
+          }
+          setCurrent();
+        },
+        { rootMargin: '-40% 0px -50% 0px', threshold: [0, 0.1, 0.5, 1] },
+      );
+      sections.forEach((s) => io.observe(s));
+    </script>
+  )
+}
