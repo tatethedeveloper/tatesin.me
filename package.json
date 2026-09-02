@@ -21,6 +21,7 @@
     "esbuild": true
   },
   "devDependencies": {
-    "@types/three": "^0.185.4"
+    "@types/three": "^0.185.4",
+    "lighthouse": "^13.4.1"
   }
 }

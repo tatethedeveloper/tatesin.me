@@ -4,9 +4,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-This repository (`tatethedeveloper.github.io`, served at the custom domain `tatesin.me` per `CNAME`) currently contains no site source code — only repo metadata (`README.md`, `CNAME`) and installed Claude Code skills under `.claude/skills/` and `.agents/skills/`. There is no build system, package manager, linter, or test suite yet.
+Astro 7 + TypeScript, vanilla CSS, one Three.js island. Deploys to GitHub
+Pages via `.github/workflows/deploy.yml` on push to `main`; the custom domain
+is `public/CNAME`. The design plan and its genericness review are in
+`docs/design-plan.md`.
 
-When the user starts adding a site (static HTML, a static site generator, or a framework), update this file with the actual build/dev/test commands and the real architecture once they exist — don't invent them ahead of time.
+### Commands
+
+- `npm run dev` / `npm run build` / `npm run preview` (preview serves `dist/` on :4321)
+- `npx astro check` for types across `.astro` files
+- Playwright CLI is configured in `.playwright/cli.config.json` (Chromium, isolated).
+  `playwright-cli open http://localhost:4321/`, then `resize`, `screenshot`, `press Tab`, `eval`.
+  Reduced motion: open a session with a config whose `contextOptions` has `reducedMotion: "reduce"`.
+- Lighthouse: `CHROME_PATH=<playwright chrome-headless-shell> npx lighthouse http://localhost:4321/ --form-factor=mobile --screenEmulation.mobile --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new"`
+- OG image: build, preview, then screenshot `/og/` at 1200x630 into `public/og.png`. Do this after the hero changes materially; the image includes the structure.
+
+### How it fits together
+
+- `src/lib/git.ts` reads `git log` at build time; `src/lib/lattice.ts` is the pure growth
+  rule that turns commits into struts. Both the build-time SVG fallback in
+  `src/components/BuildLog.astro` and the lazily loaded scene in
+  `src/scripts/buildlog-scene.ts` draw from the same struts, so they are the same drawing.
+  CI checks out with `fetch-depth: 0` for this reason.
+- `src/content/projects/*.md` is the typed collection (`src/content.config.ts`). Adding a
+  project is one file. `src/lib/projects.ts` owns status order and copy.
+- Tokens and type roles live in `src/styles/global.css`; components use them, never raw hex.
+- Everything Tate still has to supply is marked `TODO(tate)` in source (`grep -rn "TODO(tate)" src`).
 
 # Portfolio site — Tate Sinclair
 

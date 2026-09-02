@@ -2,8 +2,9 @@
 /**
  * The hero structure: this repository's commit history drawn as a lattice.
  * The SVG is rendered at build time and is the fallback; the Three.js scene
- * replaces it only when WebGL is available, the device is not low-powered
- * and the visitor has not asked for reduced motion. The caption is the
+ * replaces it only on viewports of 768px and up, when WebGL is available,
+ * the device is not low-powered and the visitor has not asked for reduced
+ * motion. The caption is the
  * accessible version of both.
  */
 import { getCommits } from '../lib/git';
@@ -143,6 +144,9 @@ const data = {
   const dataEl = document.querySelector<HTMLScriptElement>('script[data-buildlog]');
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Phones get the same drawing, flat. The scene is a 500kB parse and drag
+  // competes with scroll on a small touch screen; neither is worth it there.
+  const wide = window.matchMedia('(min-width: 768px)').matches;
   const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
   const lowPower =
     (nav.hardwareConcurrency ?? 4) <= 2 || (nav.deviceMemory ?? 4) <= 2 || nav.connection?.saveData === true;
@@ -155,20 +159,32 @@ const data = {
     }
   })();
 
-  if (stage && dataEl && !reduced && !lowPower && hasWebGL) {
+  if (stage && dataEl && wide && !reduced && !lowPower && hasWebGL) {
     const data = JSON.parse(dataEl.textContent || '{}');
     if (Array.isArray(data.struts) && data.struts.length > 0) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((e) => e.isIntersecting)) return;
-          io.disconnect();
-          import('../scripts/buildlog-scene').then(({ mount }) => mount(stage, data)).catch(() => {
-            /* SVG stays. */
-          });
-        },
-        { rootMargin: '200px' },
-      );
-      io.observe(stage);
+      // Text first. The scene loads after the page has finished loading and
+      // the main thread is idle, and only if the stage is near the viewport.
+      const load = () =>
+        import('../scripts/buildlog-scene').then(({ mount }) => mount(stage, data)).catch(() => {
+          /* SVG stays. */
+        });
+      const whenIdle = () => {
+        if ('requestIdleCallback' in window) window.requestIdleCallback(() => load(), { timeout: 2000 });
+        else window.setTimeout(load, 200);
+      };
+      const whenNear = () => {
+        const io = new IntersectionObserver(
+          (entries) => {
+            if (!entries.some((e) => e.isIntersecting)) return;
+            io.disconnect();
+            whenIdle();
+          },
+          { rootMargin: '200px' },
+        );
+        io.observe(stage);
+      };
+      if (document.readyState === 'complete') whenNear();
+      else window.addEventListener('load', whenNear, { once: true });
     }
   }
 </script>

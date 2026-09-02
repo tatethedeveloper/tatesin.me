@@ -270,3 +270,20 @@ Taste skill's tell list. Revisions:
 
 See the end of the conversation in which this plan was written; they are
 tracked as `TODO(tate)` in the source once the page exists.
+
+## Decisions made during the build
+
+- **The scene loads on viewports of 768px and up only.** Below that the
+  page shows the build-time SVG, which is the same drawing. Reason: on a
+  simulated mid-range phone the Three.js module alone costs ~380ms of main
+  thread time and pulls the mobile Lighthouse performance score to 91, under
+  the brief's floor of 95. Phones also cannot hover, and dragging to orbit
+  competes with scrolling. With the gate, mobile and desktop both score 100
+  in all four categories and the desktop experience is unchanged. Reversible
+  by removing the `wide` condition in `BuildLog.astro`.
+- **Struts are thin instanced boxes, not WebGL lines.** Lines are one device
+  pixel wide whatever the screen, which is too faint on the paper and halves
+  again on a 2x display. Boxes keep a real thickness and raycast cleanly.
+- **Fonts stay at three files, 61kB.** Sans 400 and 600 plus Mono 400, latin
+  subset. Total HTML plus inlined CSS plus fonts is about 68kB gzipped
+  against a 100kB budget; the scene is 133kB gzipped against 180kB.
