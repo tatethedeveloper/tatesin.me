@@ -1,0 +1,78 @@
+---
+import ProjectRow from './ProjectRow.astro';
+import { getProjects, statusGroups } from '../lib/projects';
+import { site } from '../lib/site';
+
+const projects = await getProjects();
+const counts = {
+  building: projects.filter((p) => p.data.status === 'building').length,
+  planned: projects.filter((p) => p.data.status === 'planned').length,
+  shipped: projects.filter((p) => p.data.status === 'shipped').length,
+};
+const total = projects.length;
+
+// Plain sentence describing the state of the list. Written for the real
+// counts rather than assuming four.
+const parts: string[] = [];
+if (counts.building) parts.push(`${counts.building} being built`);
+if (counts.planned) parts.push(`${counts.planned} planned`);
+if (counts.shipped) parts.push(`${counts.shipped} shipped`);
+const intro =
+  total === 0
+    ? 'Nothing here yet.'
+    : `${total === 1 ? 'One project' : `${total} projects`}: ${parts.join(', ')}.`;
+---
+
+<section class="wrap section section-grid" id="work" aria-labelledby="work-title">
+  <div class="section-head">
+    <h2 class="h2" id="work-title">Work</h2>
+    <p class="muted small head-note">{intro}</p>
+  </div>
+  <div class="section-body">
+    {
+      total === 0 ? (
+        <p class="measure">
+          I'm deciding what to build first. Anything I start will show up here as planned, then
+          building, then shipped. In the meantime, <a href={site.github}>GitHub</a> has whatever I've
+          pushed.
+        </p>
+      ) : (
+        statusGroups.map((group) => {
+          const items = projects.filter((p) => p.data.status === group.status);
+          return (
+            <div class="group">
+              <h3 class="group-title small">{group.heading}</h3>
+              {items.length === 0 ? (
+                <p class="muted group-empty">{group.empty}</p>
+              ) : (
+                <ul>
+                  {items.map((project) => (
+                    <ProjectRow project={project} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .head-note {
+    margin-top: 8px;
+    max-width: 28ch;
+  }
+  .group + .group {
+    margin-top: 32px;
+  }
+  .group-title {
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .group-empty {
+    padding-block: 16px;
+  }
+</style>

@@ -17,7 +17,7 @@ const isHome = Astro.url.pathname === '/';
             </li>
           ))
         }
-        <li>
+        <li class="nav-github">
           <a href={site.github} rel="me">GitHub</a>
         </li>
       </ul>
@@ -45,6 +45,13 @@ const isHome = Astro.url.pathname === '/';
   .nav-name {
     font-weight: 600;
     text-decoration: none;
+    white-space: nowrap;
+  }
+  /* GitHub is also in Contact and the footer; at 320 it does not fit. */
+  @media (max-width: 479px) {
+    .nav-github {
+      display: none;
+    }
   }
   .nav-list {
     display: flex;

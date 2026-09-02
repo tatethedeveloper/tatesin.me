@@ -34,3 +34,6 @@ skills-lock.json
 
 # Claude MD file (not relevant to the project source code)
 CLAUDE.md
+
+# playwright-cli output
+.playwright-cli/
