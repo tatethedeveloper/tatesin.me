@@ -1,0 +1,71 @@
+---
+/**
+ * What Tate works in and what he is learning, as two large lists. Grouped by
+ * honest proficiency; no bars, no logos, no ratings. Empty groups render a
+ * placeholder rather than a guess.
+ */
+import { skills } from '../lib/skills';
+import Placeholder from './Placeholder.astro';
+---
+
+<section class="caps wrap" aria-labelledby="caps-title">
+  <h2 class="h2 mist" id="caps-title">Where I am with tools</h2>
+  <div class="groups">
+    {
+      skills.map((g) => (
+        <div class="group">
+          <h3 class="lede">{g.heading}</h3>
+          {g.items.length ? (
+            <ul class="items title">
+              {g.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <Placeholder label={g.placeholder} block />
+          )}
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .caps {
+    padding-block: var(--section);
+    display: grid;
+    gap: 48px;
+  }
+  .groups {
+    display: grid;
+    gap: 48px;
+  }
+  .group {
+    display: grid;
+    gap: 20px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15em 0.6em;
+  }
+  .items li:not(:last-child)::after {
+    content: ',';
+  }
+  @media (min-width: 1024px) {
+    .caps {
+      grid-template-columns: 3fr 9fr;
+      column-gap: 24px;
+    }
+    .groups {
+      grid-column: 2;
+    }
+    .group {
+      grid-template-columns: 2fr 7fr;
+      column-gap: 24px;
+      align-items: start;
+    }
+  }
+</style>

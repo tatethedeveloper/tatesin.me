@@ -3,22 +3,22 @@ import { site } from '../lib/site';
 const year = new Date().getFullYear();
 ---
 
-<footer class="footer">
-  <div class="wrap footer-inner small muted">
-    <span>{year} {site.name}</span>
+<footer class="foot">
+  <div class="wrap row small mist">
+    <span>{site.name}, {year}</span>
     <a href={site.repo}>Source on GitHub</a>
   </div>
 </footer>
 
 <style>
-  .footer {
+  .foot {
     border-top: 1px solid var(--line);
-    padding-block: 32px;
+    padding-block: 28px;
   }
-  .footer-inner {
+  .row {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: 24px;
     flex-wrap: wrap;
   }
 </style>

@@ -29,7 +29,7 @@ const ogImage = new URL('/og.png', site.url).href;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#e9edf1" />
+    <meta name="theme-color" content="#0a0f1e" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
@@ -46,18 +46,16 @@ const ogImage = new URL('/og.png', site.url).href;
 
     <link
       rel="preload"
-      href="/fonts/ibm-plex-sans-latin-400-normal.woff2"
+      href="/fonts/bricolage-grotesque-latin-variable.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
-    <link
-      rel="preload"
-      href="/fonts/ibm-plex-sans-latin-600-normal.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <script is:inline>
+      // Before first paint: let CSS know script runs, and whether motion is wanted.
+      document.documentElement.classList.add('js');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced');
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

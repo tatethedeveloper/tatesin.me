@@ -1,78 +1,60 @@
 ---
-import ProjectRow from './ProjectRow.astro';
 import { getProjects, statusGroups } from '../lib/projects';
+import ProjectPanel from './ProjectPanel.astro';
 import { site } from '../lib/site';
 
 const projects = await getProjects();
-const counts = {
-  building: projects.filter((p) => p.data.status === 'building').length,
-  planned: projects.filter((p) => p.data.status === 'planned').length,
-  shipped: projects.filter((p) => p.data.status === 'shipped').length,
+// Building first, then planned, then shipped: the order a visitor cares about.
+const order = statusGroups.map((g) => g.status);
+const sorted = [...projects].sort((a, b) => order.indexOf(a.data.status) - order.indexOf(b.data.status));
+const counts = order.map((s) => projects.filter((p) => p.data.status === s).length);
+const describe = () => {
+  const parts = [];
+  if (counts[0]) parts.push(`${counts[0]} being built`);
+  if (counts[1]) parts.push(`${counts[1]} planned`);
+  if (counts[2]) parts.push(`${counts[2]} shipped`);
+  return parts.join(', ');
 };
-const total = projects.length;
-
-// Plain sentence describing the state of the list. Written for the real
-// counts rather than assuming four.
-const parts: string[] = [];
-if (counts.building) parts.push(`${counts.building} being built`);
-if (counts.planned) parts.push(`${counts.planned} planned`);
-if (counts.shipped) parts.push(`${counts.shipped} shipped`);
-const intro =
-  total === 0
-    ? 'Nothing here yet.'
-    : `${total === 1 ? 'One project' : `${total} projects`}: ${parts.join(', ')}.`;
 ---
 
-<section class="wrap section section-grid" id="work" aria-labelledby="work-title">
-  <div class="section-head">
-    <h2 class="h2" id="work-title">Work</h2>
-    <p class="muted small head-note">{intro}</p>
-  </div>
-  <div class="section-body">
+<section class="work" id="work" aria-labelledby="work-title">
+  <div class="wrap head">
+    <h2 class="display" id="work-title">Work</h2>
     {
-      total === 0 ? (
-        <p class="measure">
-          I'm deciding what to build first. Anything I start will show up here as planned, then
-          building, then shipped. In the meantime, <a href={site.github}>GitHub</a> has whatever I've
-          pushed.
-        </p>
+      projects.length === 0 ? (
+        <p class="lede measure mist">Nothing here yet. The first thing I build goes at the top.</p>
       ) : (
-        statusGroups.map((group) => {
-          const items = projects.filter((p) => p.data.status === group.status);
-          return (
-            <div class="group">
-              <h3 class="group-title small">{group.heading}</h3>
-              {items.length === 0 ? (
-                <p class="muted group-empty">{group.empty}</p>
-              ) : (
-                <ul>
-                  {items.map((project) => (
-                    <ProjectRow project={project} />
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })
+        <p class="lede measure mist">
+          {projects.length === 1 ? 'One thing' : `${projects.length} things`}, in the order they matter: {describe()}. Nothing is shown as done until it is.
+        </p>
       )
     }
   </div>
+  {
+    projects.length > 0 && (
+      <div class="stack">
+        {sorted.map((p, i) => (
+          <ProjectPanel project={p} index={i} total={sorted.length} />
+        ))}
+      </div>
+    )
+  }
+  {
+    projects.length === 0 && (
+      <p class="wrap small mist">
+        Until then, the work in progress is on <a href={site.repo}>GitHub</a>.
+      </p>
+    )
+  }
 </section>
 
 <style>
-  .head-note {
-    margin-top: 8px;
-    max-width: 28ch;
+  .head {
+    display: grid;
+    gap: 32px;
+    padding-block: var(--section) clamp(48px, 8vw, 96px);
   }
-  .group + .group {
-    margin-top: 32px;
-  }
-  .group-title {
-    font-weight: 600;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--line);
-  }
-  .group-empty {
-    padding-block: 16px;
+  .stack {
+    position: relative;
   }
 </style>

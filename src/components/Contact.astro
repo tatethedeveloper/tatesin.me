@@ -1,82 +1,89 @@
 ---
 import { site } from '../lib/site';
+import Placeholder from './Placeholder.astro';
 ---
 
-<section class="wrap section section-grid" id="contact" aria-labelledby="contact-title">
-  <div class="section-head">
-    <h2 class="h2" id="contact-title">Contact</h2>
-  </div>
-  <div class="section-body contact-body">
-    <p class="measure">
-      Email is the best way to reach me.
-    </p>
-    <div class="email-panel">
-      <a class="email mono" href={`mailto:${site.email}`}>{site.email}</a>
-      <button class="button button--quiet copy" type="button" data-email={site.email}>
-        Copy email
-      </button>
+<section class="contact" id="contact" aria-labelledby="contact-title">
+  <div class="wrap inner">
+    <h2 class="display" id="contact-title">Say hello</h2>
+    <div class="ways">
+      <div class="way">
+        <p class="small mist">Email</p>
+        {
+          site.email ? (
+            <p class="email-row">
+              <a class="lede" href={`mailto:${site.email}`}>{site.email}</a>
+              <button class="button ghost" type="button" data-copy={site.email}>
+                Copy email
+              </button>
+            </p>
+          ) : (
+            <Placeholder label="EMAIL ADDRESS" />
+          )
+        }
+      </div>
+      <div class="way">
+        <p class="small mist">Elsewhere</p>
+        <p class="links lede">
+          {site.github ? <a href={site.github}>GitHub</a> : <Placeholder label="GITHUB URL" />}
+          {site.linkedin ? <a href={site.linkedin}>LinkedIn</a> : <Placeholder label="LINKEDIN URL" />}
+        </p>
+      </div>
     </div>
-    <ul class="contact-links small">
-      <li><a href={site.github} rel="me">GitHub</a></li>
-      <li><a href={site.linkedin} rel="me">LinkedIn</a></li>
-    </ul>
-    <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
   </div>
 </section>
 
 <style>
-  .contact-body {
-    display: grid;
-    gap: 24px;
-    justify-items: start;
+  .contact {
+    background: var(--panel);
+    border-top: 1px solid var(--line);
   }
-  .email-panel {
+  .inner {
+    display: grid;
+    gap: 56px;
+    padding-block: var(--section);
+  }
+  .ways {
+    display: grid;
+    gap: 40px;
+  }
+  .way {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .email-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px 20px;
-    padding: 16px 20px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    gap: 20px;
   }
-  .email {
-    font-size: 1.0625rem;
-    word-break: break-all;
-  }
-  .copy {
-    min-height: 40px;
-  }
-  .copy[data-copied] {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .contact-links {
+  .links {
     display: flex;
+    flex-wrap: wrap;
     gap: 24px;
+  }
+  @media (min-width: 1024px) {
+    .ways {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 24px;
+    }
   }
 </style>
 
 <script>
-  const button = document.querySelector<HTMLButtonElement>('button.copy');
-  const status = document.querySelector<HTMLElement>('[data-copy-status]');
-  let timer = 0;
-  button?.addEventListener('click', async () => {
-    const email = button.dataset.email ?? '';
-    try {
-      await navigator.clipboard.writeText(email);
-      button.textContent = 'Copied';
-      button.setAttribute('data-copied', '');
-      if (status) status.textContent = 'Email address copied to clipboard.';
-    } catch {
-      // Clipboard can be unavailable (insecure context, permissions). Say so.
-      button.textContent = "Couldn't copy";
-      if (status) status.textContent = 'Copying failed. Select the address and copy it manually.';
-    }
-    window.clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      button.textContent = 'Copy email';
-      button.removeAttribute('data-copied');
-    }, 2000);
-  });
+  const btn = document.querySelector<HTMLButtonElement>('[data-copy]');
+  if (btn) {
+    const label = btn.textContent;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy || '');
+        btn.textContent = 'Copied';
+        window.setTimeout(() => (btn.textContent = label), 2000);
+      } catch {
+        btn.textContent = 'Select and copy it';
+      }
+    });
+  }
 </script>

@@ -1,5 +1,6 @@
 ---
 # TODO(tate): placeholder project. Replace with a real one or delete.
+placeholder: true
 title: Recall
 summary: A command-line tool that turns a folder of markdown notes into spaced-repetition flashcards.
 status: planned

@@ -1,0 +1,51 @@
+---
+/**
+ * The one way missing content is shown. A dashed amber frame with the label
+ * in mono, so it cannot be mistaken for real content. `block` makes it fill
+ * a slot (an image frame, a paragraph); inline is for a word or a link.
+ */
+interface Props {
+  label: string;
+  block?: boolean;
+  /** Aspect ratio for block slots, e.g. "4 / 3". */
+  ratio?: string;
+  class?: string;
+}
+const { label, block = false, ratio, class: cls } = Astro.props;
+---
+
+{
+  block ? (
+    <div class:list={['ph', 'ph-block', cls]} style={ratio ? `aspect-ratio: ${ratio}` : undefined} role="note">
+      <span class="mono">[ADD: {label}]</span>
+    </div>
+  ) : (
+    <span class:list={['ph', 'ph-inline', 'mono', cls]} role="note">[ADD: {label}]</span>
+  )
+}
+
+<style>
+  .ph {
+    color: var(--pulse);
+    border: 1px dashed var(--pulse);
+  }
+  .ph-inline {
+    display: inline-block;
+    padding: 2px 8px;
+    vertical-align: baseline;
+  }
+  .ph-block {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 80px;
+    padding: 24px;
+    text-align: center;
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 14px,
+        color-mix(in srgb, var(--pulse) 6%, transparent) 14px 15px
+      );
+  }
+</style>

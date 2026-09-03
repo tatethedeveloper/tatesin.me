@@ -1,31 +1,71 @@
 ---
 import { site } from '../lib/site';
+import { about } from '../lib/about';
+import Placeholder from './Placeholder.astro';
 ---
 
-<section class="wrap section section-grid" id="about" aria-labelledby="about-title">
-  <div class="section-head">
-    <h2 class="h2" id="about-title">About</h2>
-  </div>
-  <div class="section-body about-body measure">
-    {/* TODO(tate): replace these three paragraphs with your own. Plain, first person, no life story. */}
-    <p>
-      I'm a software engineer based in {site.location}, early in my career. This site went up
-      before the work did, on purpose: the list above is what I'm building and what I intend to
-      build next, and it will change as things ship.
-    </p>
-    <p>
-      TODO(tate): what you're drawn to in software. One or two sentences on the kind of problems
-      you like and why.
-    </p>
-    <p>
-      TODO(tate): what you're currently learning, and what you're working towards.
-    </p>
+<section class="about wrap" id="about" aria-labelledby="about-title">
+  <h2 class="display" id="about-title">About</h2>
+  <div class="cols">
+    <div class="prose">
+      {
+        about.map((b) =>
+          'text' in b ? <p class="lede measure">{b.text}</p> : <Placeholder label={b.placeholder} block />,
+        )
+      }
+    </div>
+    <dl class="facts small">
+      <div>
+        <dt class="mist">Role</dt>
+        <dd>{site.role}</dd>
+      </div>
+      <div>
+        <dt class="mist">Based in</dt>
+        <dd>{site.location}</dd>
+      </div>
+      <div>
+        <dt class="mist">Stage</dt>
+        <dd>Early career</dd>
+      </div>
+      <div>
+        <dt class="mist">This site</dt>
+        <dd><a href={site.repo}>Built in the open</a></dd>
+      </div>
+    </dl>
   </div>
 </section>
 
 <style>
-  .about-body {
+  .about {
+    padding-block: var(--section);
     display: grid;
-    gap: 1em;
+    gap: 48px;
+  }
+  .cols {
+    display: grid;
+    gap: 48px;
+  }
+  .prose {
+    display: grid;
+    gap: 24px;
+  }
+  .facts {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+  }
+  .facts div {
+    display: grid;
+    gap: 2px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  @media (min-width: 1024px) {
+    .cols {
+      grid-template-columns: 7fr 1fr 3fr;
+    }
+    .facts {
+      grid-column: 3;
+    }
   }
 </style>

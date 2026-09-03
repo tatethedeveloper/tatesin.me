@@ -1,5 +1,6 @@
 ---
 # TODO(tate): placeholder project. Replace with a real one or delete.
+placeholder: true
 title: Commit lattice
 summary: The build-log structure from this site's hero, packaged so any repository can draw its own history.
 status: planned

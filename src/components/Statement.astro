@@ -1,0 +1,38 @@
+---
+/**
+ * One long line of display text between the hero and the work. Each word is
+ * wrapped so the motion script can brighten them in reading order as the
+ * visitor scrolls; without script every word is already bright.
+ * TODO(tate): this is written in your voice from the brief. Edit freely.
+ */
+const text =
+  'I would rather show the work while it is being built than wait until it looks finished. What is here is real, in progress, and marked as such.';
+const words = text.split(' ');
+---
+
+<section class="statement wrap" aria-label="Statement">
+  <p class="title" data-words>
+    {words.map((w) => <span class="w">{w} </span>)}
+  </p>
+</section>
+
+<style>
+  .statement {
+    padding-block: var(--section);
+  }
+  .title {
+    max-width: 22ch;
+  }
+  .w {
+    display: inline;
+    color: var(--bone);
+    transition: color 200ms var(--ease-out);
+  }
+  /* With script and motion allowed, words start dim and brighten on scroll. */
+  :global(html.js:not(.reduced)) .w {
+    color: var(--line);
+  }
+  :global(html.js:not(.reduced)) .w.on {
+    color: var(--bone);
+  }
+</style>

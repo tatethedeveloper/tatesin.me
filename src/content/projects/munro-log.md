@@ -1,5 +1,6 @@
 ---
 # TODO(tate): placeholder project. Replace with a real one or delete.
+placeholder: true
 title: Munro log
 summary: A logbook for Munro climbs that records the route, the weather at the time and who I went with.
 status: building

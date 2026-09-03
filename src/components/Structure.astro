@@ -1,0 +1,163 @@
+---
+/**
+ * The structure: this repository's commit history drawn as a lattice. The
+ * SVG is rendered at build time and is the fallback; the Three.js scene
+ * replaces it when WebGL is available, the device is not low-powered and the
+ * visitor has not asked for reduced motion. The caption is the accessible
+ * version of both.
+ */
+import { getCommits } from '../lib/git';
+import { grow, bounds, project, uniqueNodes } from '../lib/lattice';
+
+const commits = getCommits();
+const struts = grow(commits.map((c) => c.hash));
+const { centre } = bounds(struts);
+const nodes = uniqueNodes(struts);
+
+const pts = struts.flatMap((s) => [project(s.a, centre), project(s.b, centre)]);
+const xs = pts.map((p) => p[0]);
+const ys = pts.map((p) => p[1]);
+const pad = 0.8;
+const minX = Math.min(...xs) - pad;
+const minY = Math.min(...ys) - pad;
+const w = Math.max(...xs) - minX + pad;
+const h = Math.max(...ys) - minY + pad;
+const side = Math.max(w, h);
+const viewBox = `${minX - (side - w) / 2} ${minY - (side - h) / 2} ${side} ${side}`;
+const strokeW = 0.04;
+
+const first = commits[0];
+const count = commits.length;
+const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const since = first ? dateFmt.format(new Date(first.date)) : '';
+
+const data = {
+  struts: struts.map((s) => [s.a, s.b]),
+  commits: commits.map((c) => ({ h: c.hash, s: c.subject, d: dateFmt.format(new Date(c.date)) })),
+};
+---
+
+<div class="stage" data-stage aria-hidden="true">
+  <svg class="fallback" viewBox={viewBox} data-fallback>
+    <g fill="none" stroke="#c9cfdd" stroke-width={strokeW} stroke-linecap="round">
+      {
+        struts.map((s, i) => {
+          const [x1, y1] = project(s.a, centre);
+          const [x2, y2] = project(s.b, centre);
+          const last = i === struts.length - 1;
+          return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={last ? 'var(--pulse)' : undefined} />;
+        })
+      }
+    </g>
+    <g fill="var(--bone)">
+      {
+        nodes.map((p) => {
+          const [x, y] = project(p, centre);
+          return <rect x={x - 0.045} y={y - 0.045} width="0.09" height="0.09" />;
+        })
+      }
+    </g>
+  </svg>
+  <div class="tip mono" data-tip hidden></div>
+</div>
+
+<p class="caption small mist" data-caption>
+  {
+    count === 0 ? (
+      <span>This site's own history will be drawn here once it has one.</span>
+    ) : (
+      <span>
+        This is the site's own history: {count === 1 ? 'one commit' : `${count} commits`} since {since}, one strut each.
+      </span>
+    )
+  }
+  <span data-hint hidden>Drag to orbit it. Hover a strut for the commit.</span>
+</p>
+
+<script type="application/json" data-structure set:html={JSON.stringify(data)} />
+
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    touch-action: pan-y;
+  }
+  .fallback {
+    width: 100%;
+    height: 100%;
+    /* The SVG is the same drawing as the scene; give it a little of the glow. */
+    filter: drop-shadow(0 0 12px rgb(201 207 221 / 0.25));
+  }
+  .stage :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  .stage.dragging :global(canvas) {
+    cursor: grabbing;
+  }
+  .tip {
+    position: absolute;
+    z-index: 2;
+    max-width: 36ch;
+    padding: 8px 12px;
+    background: var(--bone);
+    color: var(--ground);
+    pointer-events: none;
+    transform: translate(14px, 14px);
+  }
+  .tip :global(span) {
+    display: block;
+  }
+  .tip :global(.when) {
+    opacity: 0.6;
+  }
+  .caption {
+    display: grid;
+    gap: 2px;
+    max-width: 38ch;
+  }
+</style>
+
+<script>
+  // Decide whether the scene is worth loading. Every "no" leaves the SVG.
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
+  const dataEl = document.querySelector<HTMLScriptElement>('script[data-structure]');
+  const hero = document.getElementById('hero');
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+  const lowPower =
+    (nav.hardwareConcurrency ?? 4) <= 2 || (nav.deviceMemory ?? 4) <= 2 || nav.connection?.saveData === true;
+  const hasWebGL = (() => {
+    try {
+      const c = document.createElement('canvas');
+      return Boolean(c.getContext('webgl2') || c.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  })();
+
+  if (stage && dataEl && !reduced && !lowPower && hasWebGL) {
+    const data = JSON.parse(dataEl.textContent || '{}');
+    if (Array.isArray(data.struts) && data.struts.length > 0) {
+      // Text first. The scene loads once the page has loaded and the main
+      // thread is idle. The hero is above the fold, so no viewport gate.
+      const load = () =>
+        import('../scripts/structure-scene')
+          .then(({ mount }) => mount(stage, data, { scrollTarget: hero }))
+          .catch(() => {
+            /* SVG stays. */
+          });
+      const whenIdle = () => {
+        if ('requestIdleCallback' in window) window.requestIdleCallback(() => load(), { timeout: 1500 });
+        else window.setTimeout(load, 200);
+      };
+      if (document.readyState === 'complete') whenIdle();
+      else window.addEventListener('load', whenIdle, { once: true });
+    }
+  }
+</script>

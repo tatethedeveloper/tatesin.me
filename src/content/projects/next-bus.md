@@ -1,5 +1,6 @@
 ---
 # TODO(tate): placeholder project. Replace with a real one or delete.
+placeholder: true
 title: Next bus
 summary: A small e-ink display by the front door showing the next three buses from the stop at the end of the street.
 status: planned

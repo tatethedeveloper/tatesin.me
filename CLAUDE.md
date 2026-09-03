@@ -4,10 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-Astro 7 + TypeScript, vanilla CSS, one Three.js island. Deploys to GitHub
-Pages via `.github/workflows/deploy.yml` on push to `main`; the custom domain
-is `public/CNAME`. The design plan and its genericness review are in
-`docs/design-plan.md`.
+Astro 7 + TypeScript, vanilla CSS, one Three.js island, plus `lenis` (smooth
+scroll) and `motion` (scroll-driven animation). Deploys to GitHub Pages via
+`.github/workflows/deploy.yml` on push to `main`; the custom domain is
+`public/CNAME`.
+
+**Direction (v2, Sep 2026):** Tate chose a full creative-studio redesign
+(Lusion's ambition, Auxility's engineering credibility) over the v1 blueprint
+direction. That supersedes the light-theme and low-motion constraints in §3
+and §5 below; everything else in the brief (honesty, no invented facts,
+placeholders, quality floor, budgets) still applies. The plan is
+`docs/design-plan.md`; v1 is kept as `docs/design-plan-v1.md`.
 
 ### Commands
 
@@ -17,17 +24,25 @@ is `public/CNAME`. The design plan and its genericness review are in
   `playwright-cli open http://localhost:4321/`, then `resize`, `screenshot`, `press Tab`, `eval`.
   Reduced motion: open a session with a config whose `contextOptions` has `reducedMotion: "reduce"`.
 - Lighthouse: `CHROME_PATH=<playwright chrome-headless-shell> npx lighthouse http://localhost:4321/ --form-factor=mobile --screenEmulation.mobile --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new"`
-- OG image: build, preview, then screenshot `/og/` at 1200x630 into `public/og.png`. Do this after the hero changes materially; the image includes the structure.
+- OG image: build, preview, then screenshot `/og/` at 1200x630 into `public/og.png`.
+  **TODO(tate): regenerate it; the committed `og.png` is still the v1 light image.**
 
 ### How it fits together
 
 - `src/lib/git.ts` reads `git log` at build time; `src/lib/lattice.ts` is the pure growth
-  rule that turns commits into struts. Both the build-time SVG fallback in
-  `src/components/BuildLog.astro` and the lazily loaded scene in
-  `src/scripts/buildlog-scene.ts` draw from the same struts, so they are the same drawing.
+  rule that turns commits into struts. The build-time SVG fallback in
+  `src/components/Structure.astro` and the lazily loaded scene in
+  `src/scripts/structure-scene.ts` draw from the same struts, so they are the same drawing.
   CI checks out with `fetch-depth: 0` for this reason.
+- `src/scripts/motion.ts` owns scroll behaviour: Lenis (fine pointers only), the
+  statement's word-by-word brightening, and the project visual clip reveal. All of it
+  is skipped under `prefers-reduced-motion`; CSS shows the finished state instead.
 - `src/content/projects/*.md` is the typed collection (`src/content.config.ts`). Adding a
-  project is one file. `src/lib/projects.ts` owns status order and copy.
+  project is one file. `placeholder: true` in frontmatter shows a visible mark on the site.
+  `src/lib/projects.ts` owns status order and copy.
+- Facts that are not in the repo are `null` in `src/lib/site.ts`, empty in
+  `src/lib/skills.ts`, or `placeholder` entries in `src/lib/about.ts`, and render through
+  `src/components/Placeholder.astro` as `[ADD: ...]`. Fill the value in to replace it.
 - Tokens and type roles live in `src/styles/global.css`; components use them, never raw hex.
 - Everything Tate still has to supply is marked `TODO(tate)` in source (`grep -rn "TODO(tate)" src`).
 

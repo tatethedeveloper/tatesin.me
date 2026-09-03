@@ -1,0 +1,158 @@
+---
+/**
+ * One project, presented as a full surface rather than a card. Panels stack:
+ * each one pins while the next slides over it. Status is the first thing on
+ * the panel and it changes the panel, not just a label.
+ */
+import type { Project } from '../lib/projects';
+import { statusLabel } from '../lib/projects';
+import Placeholder from './Placeholder.astro';
+
+interface Props {
+  project: Project;
+  index: number;
+  total: number;
+}
+const { project, index, total } = Astro.props;
+const { title, summary, status, role, stack, year, placeholder, repo, demo, cover } = project.data;
+const href = `/projects/${project.id}/`;
+---
+
+<article class:list={['panel', status]} style={`--i: ${index}; --n: ${total}`} data-panel>
+  <div class="wrap inner">
+    <p class="status">
+      <span class="mark" aria-hidden="true"></span>
+      {statusLabel[status]}{status === 'building' ? ' now' : ''}
+      {placeholder && <span class="ph-mark mono">Placeholder project</span>}
+    </p>
+
+    <div class="body">
+      <div class="text">
+        <h3 class="title"><a href={href}>{title}</a></h3>
+        <p class="lede measure summary">{summary}</p>
+        <p class="mono meta">
+          <span>{year}</span>
+          <span>{role}</span>
+          {stack.map((s) => <span>{s}</span>)}
+        </p>
+        <p class="links">
+          <a href={href}>Read the case study</a>
+          {repo && <a href={repo}>Repository</a>}
+          {demo && <a href={demo}>Demo</a>}
+        </p>
+      </div>
+      <div class="visual" data-reveal>
+        {cover ? <img src={cover.src} width={cover.width} height={cover.height} alt="" loading="lazy" /> : <Placeholder label="PROJECT SCREENSHOT" block ratio="4 / 3" />}
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .panel {
+    position: relative;
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    min-height: 100dvh;
+    display: grid;
+    align-items: center;
+  }
+  .inner {
+    display: grid;
+    gap: clamp(32px, 6vh, 64px);
+    padding-block: clamp(64px, 12vh, 120px);
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+  .mark {
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--bone);
+  }
+  .building .mark {
+    background: var(--pulse);
+    border-color: var(--pulse);
+  }
+  .shipped .mark {
+    background: var(--bone);
+  }
+  .planned .mark {
+    border-style: dashed;
+    border-color: var(--mist);
+  }
+  .planned .status {
+    color: var(--mist);
+  }
+  .building .status {
+    color: var(--pulse);
+  }
+  .ph-mark {
+    margin-left: 12px;
+    padding: 2px 8px;
+    border: 1px dashed var(--pulse);
+    color: var(--pulse);
+    font-weight: 400;
+  }
+  .body {
+    display: grid;
+    gap: 40px;
+  }
+  .text {
+    display: grid;
+    gap: 24px;
+    align-content: start;
+  }
+  .title a {
+    text-decoration: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .title a:hover {
+      color: var(--pulse);
+    }
+  }
+  .summary {
+    color: var(--mist);
+  }
+  .planned .title {
+    color: var(--mist);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    color: var(--mist);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .visual :global(img) {
+    width: 100%;
+    height: auto;
+  }
+  /* With script and motion, the visual uncovers from the bottom as the panel arrives. */
+  :global(html.js:not(.reduced)) .visual {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 900ms var(--ease-out);
+  }
+  :global(html.js:not(.reduced)) .visual.in {
+    clip-path: inset(0 0 0 0);
+  }
+  @media (min-width: 1024px) {
+    .body {
+      grid-template-columns: 6fr 5fr;
+      column-gap: 64px;
+      align-items: center;
+    }
+    /* The stack: every panel pins at the top and the next one slides over it. */
+    :global(html.js:not(.reduced)) .panel {
+      position: sticky;
+      top: 0;
+    }
+  }
+</style>

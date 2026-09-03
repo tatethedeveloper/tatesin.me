@@ -1,54 +1,102 @@
 ---
 import { site } from '../lib/site';
-import BuildLog from './BuildLog.astro';
+import Structure from './Structure.astro';
 ---
 
-<section class="wrap hero" aria-labelledby="hero-title">
-  <div class="hero-text">
-    <h1 class="display" id="hero-title">{site.name}</h1>
-    <p class="hero-line">
-      {site.role} in {site.location}. Early career, building in the open.
-    </p>
-    <p><a class="button" href="#work">See what I'm building</a></p>
+<section class="hero" id="hero" aria-labelledby="hero-title">
+  <div class="wrap copy">
+    <h1 class="display" id="hero-title">
+      <span class="line">Tate</span>
+      <span class="line">Sinclair</span>
+    </h1>
+    <p class="lede measure">{site.role} in {site.location}. Early career, building in the open.</p>
+    <a class="button" href="/#work">See what I'm building</a>
   </div>
-  <div class="hero-figure">
-    <BuildLog />
+  <div class="scene">
+    <Structure />
   </div>
 </section>
 
 <style>
   .hero {
+    position: relative;
+    min-height: 100dvh;
     display: grid;
-    gap: 40px;
-    padding-block: 48px 64px;
-    align-content: center;
+    align-items: end;
+    padding-top: var(--nav-h);
+    padding-bottom: clamp(40px, 6vw, 72px);
+    overflow: clip;
   }
-  .hero-text {
+  /* The structure fills the hero; the copy sits over its lower-left. */
+  .scene {
+    position: absolute;
+    inset: var(--nav-h) 0 0 0;
     display: grid;
-    gap: 20px;
-    align-content: start;
+    grid-template-rows: 1fr auto;
+    padding: 0 var(--margin);
+    pointer-events: none;
   }
-  .hero-line {
-    font-size: 1.25rem;
-    line-height: 1.4;
-    max-width: 24ch;
+  .scene :global(.stage) {
+    pointer-events: auto;
+    justify-self: end;
+    width: min(92vw, 78vh);
+    height: min(92vw, 78vh);
+    margin-top: clamp(0px, 2vh, 24px);
   }
-  .hero-text p:last-child {
-    margin-top: 8px;
+  .scene :global(.caption) {
+    justify-self: end;
+    text-align: right;
+    pointer-events: auto;
+    margin-bottom: clamp(40px, 6vw, 72px);
+  }
+  .copy {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 28px;
+    pointer-events: none;
+  }
+  .copy > * {
+    pointer-events: auto;
+    width: fit-content;
+  }
+  .line {
+    display: block;
+  }
+  .lede {
+    color: var(--mist);
+    max-width: 30ch;
   }
   @media (min-width: 1024px) {
+    .scene :global(.stage) {
+      width: min(52vw, 68vh);
+      height: min(52vw, 68vh);
+      margin-right: 2vw;
+    }
+  }
+  @media (max-width: 1023px) {
     .hero {
-      min-height: calc(100dvh - var(--nav-h));
-      grid-template-columns: repeat(12, 1fr);
-      column-gap: var(--gutter);
-      align-items: center;
-      padding-block: 24px 64px;
+      align-items: start;
+      padding-top: calc(var(--nav-h) + 24px);
+      row-gap: 32px;
     }
-    .hero-text {
-      grid-column: 1 / 6;
+    .scene {
+      position: relative;
+      inset: auto;
+      padding: 0 var(--margin);
+      grid-template-rows: auto auto;
+      gap: 12px;
     }
-    .hero-figure {
-      grid-column: 6 / 13;
+    .scene :global(.stage) {
+      justify-self: start;
+      width: min(100%, 70vh);
+      height: min(88vw, 60vh);
+      margin: 0;
+    }
+    .scene :global(.caption) {
+      justify-self: start;
+      text-align: left;
+      margin: 0;
     }
   }
 </style>

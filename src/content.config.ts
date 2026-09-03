@@ -15,6 +15,8 @@ const projects = defineCollection({
       demo: z.string().url().optional(),
       cover: image().optional(),
       featured: z.boolean().default(false),
+      /** Seed content, not real work. Renders a visible mark on the site. */
+      placeholder: z.boolean().default(false),
     }),
 });
 

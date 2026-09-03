@@ -1,289 +1,197 @@
-# Design plan
+# Design plan (v2: creative-studio redesign)
 
-Written before any UI code, per CLAUDE.md §9 step 2. Reviewed once against §3 for
-genericness; the revisions from that pass are listed at the end so the reasoning
-is visible.
+Supersedes `design-plan-v1.md`. Written before UI code, reviewed once for
+genericness; revisions are listed at the end.
 
 ## Design read
 
-A developer portfolio for hiring managers and collaborators, for a person early
-in their career, built before the body of work exists. The visual language is
-technical and precise, in the register of a drawing office rather than a
-terminal. Dials, in the Taste skill's terms: variance 6, motion 5, density 5.
-Lower variance than a designer portfolio because the audience is scanning for
-substance, not spectacle; higher density than a gallery because the content is
-a roadmap and should read like one.
+Reading this as: a developer portfolio, overhaul mode, for hiring managers
+and collaborators, with an immersive creative-studio language (Lusion's
+ambition, Auxility's engineering credibility), built on the existing Astro +
+Three.js architecture. Dials: variance 8, motion 8, density 3.
 
-## Direction: version-controlled, drawn like a blueprint
+The person is Tate Sinclair, software engineer, Scotland, early career,
+building in the open. That last fact is the whole design problem: the site is
+loud about craft and honest that the body of work is still being built.
+Nothing on the page claims more than the content behind it.
 
-Of the three prompts in §3, **version-controlled** is the structural idea and
-**blueprint** is the drawing style. The two combine without fighting:
+## The one bold thing: the structure
 
-- The brief's central problem is honesty about a nearly empty portfolio, and
-  `status` is the mechanism it names. "Version-controlled" makes status the
-  structure of the page rather than a label on a card: the work section is a
-  log read top to bottom (building now, planned, shipped), and the site's own
-  commit history is the material for the hero. The absence of shipped work
-  becomes a visible starting point on a timeline, not a gap.
-- Blueprint supplies the craft: hairline rules that organise real content,
-  measured alignment, a restrained palette, annotation-style metadata. It is
-  not used as decoration. No grid lines drawn for atmosphere, no dimension
-  marks on things that have no dimension.
-- Instrument panel was rejected because a personal site with five sections
-  and four projects does not have the information density that makes that
-  style honest; forced density reads as a dashboard template.
+The v1 idea survives because it is the only 3D object this site can honestly
+own: a lattice grown from this repository's own commit history, one strut per
+commit, deterministic (`src/lib/lattice.ts`). In v2 it stops being a diagram
+beside the headline and becomes the centrepiece:
 
-**Boldness is spent in the hero, on the 3D structure.** Everything after the
-hero is plain: a list, three short paragraphs, a contact block.
+- It fills the hero, luminous on a deep ground, and assembles strut by strut
+  on load. That assembly is the single self-playing animation on the page.
+- Scrolling is the interaction. The camera pulls back and rises as the
+  visitor scrolls out of the hero, so the structure recedes into the page
+  rather than being cut off by it. Mouse position tilts it a few degrees.
+  Dragging orbits it. Hovering a strut shows the commit.
+- The text beside it says exactly what it is, in plain words, with the real
+  count and date. The canvas is `aria-hidden`; the caption is the accessible
+  version; the build-time SVG is the no-WebGL and reduced-motion fallback.
 
-## The 3D moment: the site's own build log
-
-A wireframe structure generated from this repository's git history. One strut
-per commit, placed by a deterministic growth rule on a cubic lattice, so the
-structure gets taller and wider as the site is worked on. It assembles strut
-by strut on page load (the single orchestrated motion on the page), then sits
-still. The visitor can orbit it by dragging, and hovering a strut shows the
-commit subject and date.
-
-Why this and not an object:
-- It is generated from data, not modelled, and the data is real. There is
-  nothing to invent and nothing to exaggerate.
-- It is about the thing the site claims: building in the open. The structure
-  is literally the record of the site being built, and it grows as Tate works.
-- It carries information (commit count, cadence, what changed) rather than
-  being an ambient shape.
-- It looks like a blueprint drawing in three dimensions, so it belongs to the
-  rest of the page instead of sitting on top of it.
-
-Honesty rules that follow from it:
-- The canvas is `aria-hidden` and skippable. A visible caption next to it
-  states the same facts in text ("This site's own history: N commits since
-  2 Sep 2026"). That caption is the accessible version; the canvas is an
-  enhancement of it. Decorative-and-skippable is the honest classification,
-  because the information is fully available without it.
-- The fallback for no WebGL, low-power devices and `prefers-reduced-motion`
-  is an inline SVG of the same structure, projected at build time from the
-  same data. Not a different image; the same drawing, flat.
-- Render loop pauses off-screen and on hidden tabs. DPR capped at 2.
-  Geometry, materials and renderer disposed on teardown.
-- Budget: procedural only, zero asset bytes. Three.js imported selectively.
-
-Prototype this first at low fidelity (lines only, no hover) and judge it at
-320 and 1440. If a lattice of twenty struts looks like a scribble rather than
-a structure, change the growth rule; if no rule works, fall back to the SVG as
-the permanent hero and spend nothing further. The brief is explicit that a
-restrained 2D site beats a mediocre 3D one.
+Everything else on the page is typography and space.
 
 ## Tokens
 
-Light theme, locked. Not dual-mode: the direction depends on the paper, and a
-dark variant of a blueprint is the near-black engineer default §3 rules out.
-Contrast ratios below were computed, not estimated.
+Dark ground, one theme. Chosen because the brief pins the direction to
+immersive/creative-studio. The ground is a saturated deep blue, not tinted
+near-black, so it reads as a colour decision rather than a default.
 
-| Token      | Hex       | Role                                        | Contrast |
-|------------|-----------|---------------------------------------------|----------|
-| `--paper`  | `#E9EDF1` | Page background. Cool grey-blue, not cream. |          |
-| `--panel`  | `#F7F9FB` | Raised plane: inputs, the copy-email block. |          |
-| `--ink`    | `#16202B` | Text, strokes, nodes.                       | 13.99:1 on paper |
-| `--muted`  | `#4B5665` | Secondary text, metadata.                   | 6.33:1 on paper |
-| `--line`   | `#B4BDC7` | Hairlines. Never used for text.             |          |
-| `--accent` | `#B8450B` | One accent: the current strut, the building status, focus rings, link underlines. | 4.58:1 on paper; light text on it 5.11:1 |
+| Token      | Hex       | Role                                                    | Contrast on ground |
+|------------|-----------|---------------------------------------------------------|--------------------|
+| `--ground` | `#0A0F1E` | Page background. Deep blue, clearly not black.          |                    |
+| `--panel`  | `#121A2E` | Raised plane: project panels, contact block.            |                    |
+| `--line`   | `#26304A` | Rules. Never text.                                      |                    |
+| `--bone`   | `#EDE9E3` | Primary text. Warm off-white, not pure white.           | 15.2:1             |
+| `--mist`   | `#98A1B8` | Secondary text.                                         | 7.1:1              |
+| `--pulse`  | `#FFB238` | The one accent: current strut, "building" status, focus rings, links. | 10.4:1; ground text on it 11.8:1 |
 
-The accent is a survey-marker orange chosen because it means "in progress" in
-the physical world and because warm-on-cool is uncommon among developer
-portfolios, which are overwhelmingly dark with a cold accent. It is used
-sparingly: a visitor should be able to count its appearances.
+Amber on deep blue: warm-on-cool, uncommon among developer portfolios (which
+run a cold accent on neutral black), and it carries the meaning the v1 accent
+did: this is the thing in progress.
 
-Corner radius: 2px everywhere, one scale. Shadows: none. Elevation is done
-with the panel colour and hairlines.
+Corner radius: 0 on panels and frames, full pill on buttons. That is the whole
+rule; nothing else is rounded. No drop shadows; depth comes from the panel
+colour, hairlines and the 3D itself.
 
 ## Typography
 
-Two families, both from IBM Plex, self-hosted and subset to latin.
+Two families, unmistakably distinct in role.
 
-- **IBM Plex Sans** for everything read: display, headings, body, labels,
-  status words. Weights 400 and 600 only.
-- **IBM Plex Mono** only where the text is a machine identifier: commit
-  subjects and dates in the hero tooltip, repository URLs, the year on the
-  timeline. Not for section labels, not for the nav, not for status words.
+- **Bricolage Grotesque** (variable, self-hosted, latin subset) for everything
+  read. At display sizes with the optical axis high it has a drafted, slightly
+  eccentric quality; at text sizes it is a clean grotesque. One family covers
+  display through body without looking like a template's Inter.
+- **IBM Plex Mono** (already in the repo) only for machine text: commit hashes
+  and subjects, dates, stack lists, repository URLs. Never for labels.
 
-Why Plex: it was designed for technical documentation, it has a drafting
-quality at display sizes without being a geometric grotesque, and having the
-mono in the same superfamily means the two roles are related without a third
-face. Why not Geist or Inter: per §3b, that is the Vercel house look.
+Hand-set scale, base 18px, body line-height 1.5, measure 60ch.
 
-Scale, hand-set rather than a ratio. Base 17px, body line-height 1.55, body
-measure 62ch.
+| Role    | Size                          | Weight | Line | Tracking |
+|---------|-------------------------------|--------|------|----------|
+| display | clamp(3.5rem, 11vw, 10rem)    | 500    | 0.92 | -0.035em |
+| title   | clamp(2.25rem, 5.5vw, 4.5rem) | 500    | 0.98 | -0.025em |
+| h2      | clamp(1.75rem, 3vw, 2.5rem)   | 500    | 1.1  | -0.015em |
+| lede    | clamp(1.25rem, 1.8vw, 1.5rem) | 400    | 1.35 | -0.005em |
+| body    | 1.125rem                      | 400    | 1.5  | 0        |
+| small   | 0.9375rem                     | 400    | 1.45 | 0        |
+| mono    | 0.875rem                      | 400    | 1.5  | 0        |
 
-| Role     | Size                          | Weight | Line | Tracking |
-|----------|-------------------------------|--------|------|----------|
-| display  | clamp(2.375rem, 5.5vw, 4rem)  | 600    | 1.04 | -0.02em  |
-| h2       | 1.75rem                       | 600    | 1.2  | -0.01em  |
-| h3       | 1.1875rem                     | 600    | 1.3  | 0        |
-| body     | 1.0625rem                     | 400    | 1.55 | 0        |
-| small    | 0.9375rem                     | 400    | 1.5  | 0        |
-| mono     | 0.875rem                      | 400    | 1.5  | 0        |
-
-No tracked-out caps. No mono micro-labels. Emphasis inside a heading, if ever
-needed, is weight in the same face.
+No tracked-out caps. No eyebrows. No emphasis inside headings.
 
 ## Layout
 
-12-column grid at 1024 and up, 24px gutters, max content width 1200px. Section
-headings hang in columns 1-3; section content sits in columns 4-10 and never
-exceeds the body measure. Below 1024 everything is one column with the
-heading above its content. Vertical rhythm is on an 8px base; section spacing
-is 96px at desktop, 64px at mobile.
-
-### Hero (min-height 100dvh minus nav)
+Full-bleed, 24px page margin (40px at 1024+), 12-column grid at 1024+. Left
+aligned everywhere; nothing is centred. Sections are tall and sparse.
 
 ```
+HERO (100dvh)
 ┌──────────────────────────────────────────────────────────────────┐
-│ Tate Sinclair            Work   About   Contact          GitHub  │  nav, 64px
-├──────────────────────────────────────────────────────────────────┤
+│ Tate Sinclair                            Work  About  Contact    │ nav 64px
 │                                                                  │
-│  Tate Sinclair                     ╱╲    ╱╲                      │
-│  Software engineer in Scotland.   ╱  ╲__╱  ╲___                  │
-│  Early career, building in       ╱╲  ╱╲ ╱╲ ╱  ╲                  │
-│  the open.                      ╱  ╲╱  ╳  ╲╱    ╲                │
-│                                ╱___╱╲_╱ ╲__╲_____╲               │
-│  [ See what I'm building ]         ╲╱     ╲╱                     │
-│                                                                  │
-│                                   This site's own history:       │
-│                                   14 commits since 2 Sep 2026    │
-│                                   Drag to orbit                  │
+│                                  ╱╲    ╱╲                        │
+│                                 ╱  ╲__╱  ╲___    (structure,     │
+│                                ╱╲  ╱╲ ╱╲ ╱  ╲     luminous,      │
+│                               ╱  ╲╱  ╳  ╲╱    ╲   cols 6-12)     │
+│  Tate                        ╱___╱╲_╱ ╲__╲_____╲                 │
+│  Sinclair                        ╲╱     ╲╱                       │
+│  Software engineer in Scotland,                                  │
+│  building in the open.       This site's own history:            │
+│  [ See what I'm building ]   12 commits since 2 Sep 2026         │
 └──────────────────────────────────────────────────────────────────┘
-   cols 1-5: text                    cols 6-12: structure + caption
+
+STATEMENT: one long line of display text, words brightening as you scroll.
+
+WORK: one full-height panel per project; each pins as the next slides over
+it (sticky stack).
+┌──────────────────────────────────────────────────────────────────┐
+│ Building now                                                     │
+│                                                                  │
+│ Munro log                          ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐    │
+│ A logbook for Munro climbs...        [ADD: PROJECT SCREENSHOT]   │
+│ TypeScript  SvelteKit  SQLite      └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘    │
+│ Read the case study                        Placeholder project   │
+└──────────────────────────────────────────────────────────────────┘
+
+CAPABILITIES: "Working in" and "Learning" as two large lists, placeholders
+until Tate supplies them.
+
+ABOUT: heading left, [ADD: SHORT BIO] right, beside the three real facts.
+
+CONTACT: "Say hello" at display size; email and links as placeholders.
 ```
 
-Text is static HTML and readable before any script runs. One CTA. The
-headline is two short lines at most. Mobile: text first, then the structure at
-a fixed 60vw height, caption beneath.
+Mobile (< 1024): one column, text before structure, the sticky stack becomes
+a plain stack, everything left aligned at the 24px margin.
 
-### Work
+## Placeholders
 
-```
-┌──────────────┬───────────────────────────────────────────────────┐
-│ Work         │  Building now                                     │
-│              │  ●─ 2026   Project title                          │
-│ Four things  │  │         One sentence summary.                  │
-│ in progress. │  │         Solo. TypeScript, Astro.  Read more    │
-│ One is being │  │                                                │
-│ built, three │  Planned                                          │
-│ are planned. │  ○  2026   Project title                          │
-│              │  ┆         One sentence summary.                  │
-│              │  ○  2026   Project title                          │
-│              │  ┆         ...                                    │
-│              │                                                   │
-│              │  Shipped                                          │
-│              │  Nothing shipped yet. The first is at the top.    │
-└──────────────┴───────────────────────────────────────────────────┘
-```
-
-Status is rendered as the node and the rule beside it, not as a pill:
-`building` is a filled node in accent with a solid rule; `planned` is an
-outlined node in ink with a dashed rule; `shipped` is a filled node in ink
-with a solid rule. The status word appears once in plain sans in the row
-metadata for screen readers and for anyone who does not read the symbol.
-Groups are ordered building, planned, shipped because that is the order a
-visitor cares about. An empty group is a sentence, not a hidden section, and
-an empty collection is a single paragraph with a link to GitHub.
-
-Each row links to `/projects/[slug]`.
-
-### Case study page
-
-Title, status, role, stack, year, then repo and demo links if present. Body
-sections depend on status so the page never pretends:
-
-- shipped: Problem, Approach, What was hard, What I'd do differently
-- building: Problem, Approach, What's hard so far, Open questions
-- planned: Problem, Intended approach, What I expect to be hard, Open questions
-
-"Evidence" (screenshots, recordings, links) is a section that renders only
-when the markdown provides it.
-
-### About, Skills, Contact
-
-About: three paragraphs maximum in the content column. Skills: two short
-groups, "Working in" and "Learning", as plain inline lists with no bars, no
-logos, no ratings; dropped entirely if Tate does not supply them. Contact: the
-email in a panel with a "Copy email" button whose label changes to "Copied"
-for two seconds; GitHub and LinkedIn as plain links. Footer: the year and
-"Source on GitHub".
+Every fact not present in the repository is rendered by one component,
+`Placeholder.astro`: a dashed amber frame with `[ADD: LABEL]` in mono. It
+cannot be mistaken for content. The four seed projects carry
+`placeholder: true` in frontmatter and show a visible "Placeholder project"
+mark on the panel and the case study. Replacing content means editing one
+data file (`src/lib/site.ts`, `src/lib/skills.ts`) or one markdown file.
 
 ## Motion
 
-One orchestrated moment: the structure assembling in the hero, roughly 1.2s,
-each strut placed in commit order with a short ease-out. Nothing else on the
-page animates on its own. Everything else is a response to the user: nav
-active state, link underline on hover and focus, the copy button's label,
-orbiting the structure by dragging, the hover tooltip on a strut.
-
-Reduced motion: the structure renders fully assembled, orbit is still
-available by dragging, tooltip still works, no transition on any state change.
-Only `transform` and `opacity` are ever animated. Focus rings are a 2px accent
-outline offset 2px, visible on the paper, on the panel and on the ink button.
+- Load: the structure assembles (1.4s, each strut ease-out). The headline is
+  static HTML and readable before any script runs.
+- Scroll: the camera on the structure; word-by-word brightening on the
+  statement; the sticky stack in Work; the project visual frame reveals with
+  `clip-path` as it enters. All driven by scroll position through `motion`'s
+  `scroll()`, never a raw scroll listener.
+- Smooth scroll via Lenis on fine-pointer devices only. Off on touch and
+  under reduced motion.
+- Responses to the user: nav active state, link underlines, button press
+  `scale(0.97)` at 140ms ease-out, copy-email label change, orbit, hover tip.
+- Easing `cubic-bezier(0.23, 1, 0.32, 1)` for entrances; UI under 300ms.
+- Reduced motion: structure renders assembled, statement words all bright,
+  panels stack plainly, no smooth scroll, no clip reveals. Only `transform`
+  and `opacity` are ever animated.
 
 ## Principles
 
-1. Nothing on the page claims more than the content behind it. Status is
-   visible, and the empty state is written, not hidden.
-2. One family per job: sans reads, mono identifies. Colour means something
-   (in progress, focus, current) or is not used.
-3. Lines organise, they do not decorate. Every rule sits between two things.
-4. The 3D is a drawing of real data. If it stops being that, remove it.
+1. Honest first. Status is structural, placeholders are loud, no invented
+   facts. The site can be loud about craft because it is quiet about claims.
+2. One object. The structure is the only 3D and the only self-playing motion.
+3. Type does the work. Big, left-aligned, one family for reading.
+4. Scroll is the interface. Motion answers the scrollbar or the pointer;
+   nothing plays on its own after load.
 5. Text before script. The page is complete with JavaScript off.
 
-## Genericness review against §3, and what changed
+## Genericness review, and what changed
 
-Checked the first draft of this plan against the hard constraints and the
-Taste skill's tell list. Revisions:
+Checked against the frontend-design skill's tell list, the Taste skill's
+pre-flight and CLAUDE.md §3.
 
-- **Accent.** The first draft used `#CC4E00`, which fails AA for small text
-  on the paper (3.83:1) and would have needed a second darker shade for links,
-  making two accents. Replaced with `#B8450B` (4.58:1) so one hex does every
-  job.
-- **Status typography.** The first draft set the status word in Plex Mono
-  because it is "technical". §3 forbids mono for labels that carry no machine
-  meaning. Status is now sans; mono is left for commit refs, dates and URLs.
-- **Section headings.** The first draft used a sticky left-column heading
-  that follows the scroll, a pattern common enough in developer portfolios to
-  read as borrowed. The heading now hangs statically at the top of its
-  section in the left columns.
-- **Hero caption.** The first draft had "Drag to orbit · 14 commits · main"
-  as a mono strip under the canvas. That is the middle-dot metadata string
-  and the fake-version-footer tell in one line. It is now two short sentences
-  in sans.
-- **Timeline rules.** The first draft drew a continuous vertical hairline
-  the full height of the section. Between groups it connected nothing, so it
-  was decoration. The rule now only runs between nodes within a group.
-- **Dark mode.** The Taste skill defaults to dual-mode. Rejected here on
-  purpose: a dark blueprint is the near-black default and the palette above
-  is the point. Noted as a possible later addition with its own tokens.
-- **Photography.** The Taste skill asks for real images even on minimal
-  sites. This site has no product to photograph and the brief says not to
-  source stock. The visual is the generated structure and, later, real project
-  evidence on case study pages.
-
-## Open questions for Tate
-
-See the end of the conversation in which this plan was written; they are
-tracked as `TODO(tate)` in the source once the page exists.
-
-## Decisions made during the build
-
-- **The scene loads on viewports of 768px and up only.** Below that the
-  page shows the build-time SVG, which is the same drawing. Reason: on a
-  simulated mid-range phone the Three.js module alone costs ~380ms of main
-  thread time and pulls the mobile Lighthouse performance score to 91, under
-  the brief's floor of 95. Phones also cannot hover, and dragging to orbit
-  competes with scrolling. With the gate, mobile and desktop both score 100
-  in all four categories and the desktop experience is unchanged. Reversible
-  by removing the `wide` condition in `BuildLog.astro`.
-- **Struts are thin instanced boxes, not WebGL lines.** Lines are one device
-  pixel wide whatever the screen, which is too faint on the paper and halves
-  again on a 2x display. Boxes keep a real thickness and raycast cleanly.
-- **Fonts stay at three files, 61kB.** Sans 400 and 600 plus Mono 400, latin
-  subset. Total HTML plus inlined CSS plus fonts is about 68kB gzipped
-  against a 100kB budget; the scene is 133kB gzipped against 180kB.
+- **Ground colour.** First draft was `#0E0E0E`, the neutral near-black the
+  tell list names. Replaced with a saturated deep blue so the darkness is a
+  colour and the amber has something to be warm against.
+- **Accent.** First draft was electric green `#8EF0D2`, the "acid green on
+  black" default. Replaced with amber.
+- **Display face.** First draft reached for Space Grotesk, the creative-agency
+  default. Replaced with Bricolage Grotesque, whose optical-size axis makes
+  display and text genuinely different in one family.
+- **Section eyebrows.** First draft had `WORK`, `ABOUT`, `CONTACT` tracked
+  out above each heading. Removed. The headings are the headings.
+- **Project numbering.** First draft numbered panels `01 / 02 / 03 / 04`.
+  Projects are not a sequence. Removed; the status word does the ordering.
+- **Scroll cue.** First draft had "Scroll" with an arrow at the hero's foot.
+  Removed.
+- **Middle dots.** First draft joined stack as `TypeScript · SvelteKit`.
+  Now a spaced mono list.
+- **Fade-up on every section.** First draft revealed each section on entry.
+  Cut to three scroll-driven behaviours that each carry meaning: the camera
+  (the object recedes), the statement (reading pace), the stack (projects as
+  a sequence of surfaces). Nothing else animates on scroll.
+- **Photography.** The Taste skill wants real images. There are none in the
+  repo and the brief forbids inventing them. The image slot is an explicit
+  `[ADD: PROJECT SCREENSHOT]` frame, styled as a deliberate part of the
+  composition rather than a broken image.
+- **Budget.** v1 held JS-before-3D under 30kB. v2 adds Lenis and `motion`
+  (about 22kB gzipped together). Accepted for this direction; the scene is
+  still lazy and on-demand, and the page is readable before any of it loads.
