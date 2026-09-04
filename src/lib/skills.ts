@@ -5,7 +5,7 @@ export const skills: { heading: string; placeholder: string; items: string[] }[]
   {
     heading: 'Working in',
     placeholder: 'TOOLS YOU CAN WORK IN TODAY',
-    items: [], // e.g. ['TypeScript', 'Astro']
+    items: ['Azure', 'Google Cloud Platform', 'Python', 'PHP', 'HTML', 'CSS','Palantir Foundry', 'Palantir AIP', 'SQLite', 'MySQL'],
   },
   {
     heading: 'Learning',
