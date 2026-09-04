@@ -44,11 +44,13 @@ placeholders, quality floor, budgets) still applies. The plan is
   `prefers-reduced-motion` (CSS shows the finished state instead); the gallery still
   works there, it just moves instantly.
 - `src/components/DotBloom.astro` + `src/scripts/dot-bloom.ts` are the dot field behind
-  the work band: a canvas-2d halftone grid whose dots grow and brighten under two layers
-  of drifting value noise. It draws in the host element's `color`, stops when off-screen
-  or when the tab is hidden, and paints a single still frame under
-  `prefers-reduced-motion`. Dot opacity is capped on purpose — a dot is the same hue as
-  the body copy, so a brighter crest under a paragraph would take it below AA.
+  the hero: a canvas-2d halftone grid whose dots grow and brighten under two layers of
+  value noise drifting at different rates, so patches of light form and slide across it.
+  It draws in the host element's `color`, stops when off-screen or when the tab is
+  hidden, and paints a single still frame under `prefers-reduced-motion`. Dot opacity is
+  capped at 0.20 on purpose: a dot is the same hue as the body copy, and a paragraph read
+  against a dot at full bloom is 4.96:1 there — by 0.25 it is under AA. Drop it into any
+  positioned element to use it elsewhere.
 - The scene's field (the drifting point ground under the structure) is native Three.js
   in `structure-scene.ts`; Vanta.js was evaluated and not bundled (see design plan).
 - `src/content/projects/*.md` is the typed collection (`src/content.config.ts`). Adding a

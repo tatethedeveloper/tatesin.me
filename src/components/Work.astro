@@ -6,7 +6,6 @@
  */
 import { getProjects, statusGroups } from '../lib/projects';
 import ProjectSlide from './ProjectSlide.astro';
-import DotBloom from './DotBloom.astro';
 import { site } from '../lib/site';
 
 const projects = await getProjects();
@@ -25,8 +24,6 @@ const total = sorted.length;
 ---
 
 <section class="work" id="work" aria-labelledby="work-title">
-  <DotBloom gap={28} speed={0.9} />
-
   <div class="wrap head">
     <h2 class="display" id="work-title"><span class="mask"><span data-rise>Work</span></span></h2>
     {
@@ -91,15 +88,7 @@ const total = sorted.length;
 
 <style>
   .work {
-    position: relative;
-    isolation: isolate;
     padding-bottom: clamp(8px, 2vw, 24px);
-  }
-  /* Everything the section says sits above the field behind it. */
-  .head,
-  .gallery {
-    position: relative;
-    z-index: 1;
   }
   .head {
     display: grid;

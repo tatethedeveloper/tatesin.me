@@ -93,21 +93,25 @@ export function dotBloom(host: HTMLElement, { gap = 26, speed = 1 }: Options = {
       const y = originY + j * gap;
       for (let i = 0; i < cols; i++) {
         const x = originX + i * gap;
+        // The rates are in noise units: at s1 one unit is ~300px, so the
+        // coarse layer crosses the screen at roughly 65px a second. Slow
+        // enough to read as weather, fast enough to be obviously moving.
         const n =
-          noise(x * s1 + t * 0.055 * speed, y * s1 + t * 0.03 * speed) * 0.62 +
-          noise(x * s2 - t * 0.04 * speed, y * s2 + t * 0.07 * speed) * 0.38;
+          noise(x * s1 + t * 0.22 * speed, y * s1 + t * 0.12 * speed) * 0.62 +
+          noise(x * s2 - t * 0.16 * speed, y * s2 + t * 0.26 * speed) * 0.38;
 
         // smoothstep(0.42, 0.86): most of the grid stays a faint matrix, and
         // only the crests of the noise bloom.
         const e = Math.min(1, Math.max(0, (n - 0.42) / 0.44));
         const bloom = e * e * (3 - 2 * e);
 
-        // Capped deliberately: a dot is the same hue as the body copy, and
-        // above about a quarter opacity a crest under a paragraph would take
-        // that paragraph below AA. Size carries the bloom instead — which is
-        // what a halftone does anyway.
-        ctx.globalAlpha = 0.05 + bloom * 0.19;
-        const r = 0.6 + bloom * (gap * 0.2);
+        // Capped deliberately. A dot is the same hue as the body copy, so the
+        // worst case is a paragraph read against a dot at full bloom: at 0.20
+        // that pair is 4.96:1, and by a quarter opacity it has dropped under
+        // AA. Size carries the bloom instead — which is what a halftone does
+        // anyway.
+        ctx.globalAlpha = 0.05 + bloom * 0.15;
+        const r = 0.6 + bloom * (gap * 0.22);
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();

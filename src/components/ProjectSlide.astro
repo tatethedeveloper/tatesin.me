@@ -77,10 +77,8 @@ const href = `/projects/${project.id}/`;
       background-color var(--dur) var(--ease-out),
       transform 260ms var(--ease-out);
   }
-  /* Planned slides stay lighter than the rest, but not fully open: enough
-     tint to settle the bloom behind them. */
   .planned .face {
-    background: color-mix(in srgb, var(--panel) 78%, transparent);
+    background: transparent;
     border-style: dashed;
   }
   @media (hover: hover) and (pointer: fine) {

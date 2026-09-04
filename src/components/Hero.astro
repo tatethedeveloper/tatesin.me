@@ -1,9 +1,12 @@
 ---
 import { site } from '../lib/site';
 import Structure from './Structure.astro';
+import DotBloom from './DotBloom.astro';
 ---
 
 <section class="hero" id="hero" aria-labelledby="hero-title">
+  <DotBloom gap={30} speed={1} />
+
   <div class="wrap frame">
     <h1 class="display" id="hero-title">
       <span class="mask"><span class="line">Tate</span></span>
@@ -25,6 +28,7 @@ import Structure from './Structure.astro';
 <style>
   .hero {
     position: relative;
+    isolation: isolate;
     min-height: 100dvh;
     display: grid;
     align-items: stretch;
@@ -32,6 +36,8 @@ import Structure from './Structure.astro';
     overflow: clip;
   }
   .frame {
+    position: relative;
+    z-index: 1;
     display: grid;
     align-content: end;
     gap: 28px;

@@ -31,24 +31,10 @@ const { gap = 26, speed = 1, class: cls } = Astro.props;
     pointer-events: none;
     /* The dots are drawn in this colour. */
     color: var(--mist);
-    /* Two masks, intersected: the radial keeps the field off the edges so it
-       never ends on a hard line, and the linear holds it back from the top of
-       the section, where the heading and the summary are. */
-    -webkit-mask-image:
-      radial-gradient(115% 90% at 50% 58%, #000 28%, transparent 100%),
-      linear-gradient(to bottom, transparent 0, #000 var(--bloom-from, 24%));
-    mask-image:
-      radial-gradient(115% 90% at 50% 58%, #000 28%, transparent 100%),
-      linear-gradient(to bottom, transparent 0, #000 var(--bloom-from, 24%));
-    -webkit-mask-composite: source-in;
-    mask-composite: intersect;
-  }
-  /* The section's text takes proportionally more of the band on a narrow
-     screen, so the field starts lower down there. */
-  @media (max-width: 767px) {
-    .bloom {
-      --bloom-from: 33%;
-    }
+    /* Fades out towards the edges, so the field never ends on a hard line
+       against the section below it. */
+    -webkit-mask-image: radial-gradient(125% 105% at 50% 45%, #000 30%, transparent 100%);
+    mask-image: radial-gradient(125% 105% at 50% 45%, #000 30%, transparent 100%);
   }
   .bloom canvas {
     display: block;
