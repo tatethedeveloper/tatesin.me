@@ -4,7 +4,7 @@
 export const site = {
   name: 'Tate Sinclair',
   role: 'Software engineer',
-  location: 'Scotland', // TODO(tate): city, or leave as "Scotland"
+  location: 'Glasgow, Scotland', 
   url: 'https://tatesin.me',
   description: 'Tate Sinclair, software engineer in Scotland. Early career, building in the open.',
   // TODO(tate): real email address. Set to a string to replace the placeholder.
