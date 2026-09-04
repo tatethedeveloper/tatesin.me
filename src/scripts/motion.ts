@@ -44,7 +44,13 @@ export function start(): void {
   // paint and never depends on this module.
 
   // Display headings elsewhere rise once, the same way, when they arrive.
-  gsap.utils.toArray<HTMLElement>('[data-rise]').forEach((el) => {
+  // Hand the hidden state from CSS to GSAP in one synchronous step: drop the
+  // CSS rule, then set the same offset inline, so nothing paints in between
+  // and GSAP starts from an untransformed element.
+  const risers = gsap.utils.toArray<HTMLElement>('[data-rise]');
+  root.classList.add('rise-ready');
+  gsap.set(risers, { yPercent: 110 });
+  risers.forEach((el) => {
     gsap.fromTo(
       el,
       { yPercent: 110 },

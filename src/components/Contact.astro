@@ -40,7 +40,7 @@ import Placeholder from './Placeholder.astro';
   }
   .inner {
     display: grid;
-    gap: 56px;
+    gap: 40px;
     padding-block: var(--section);
   }
   .ways {
@@ -65,9 +65,18 @@ import Placeholder from './Placeholder.astro';
     gap: 24px;
   }
   @media (min-width: 1024px) {
+    /* The heading and the two ways sit on one line, aligned on their baselines,
+       rather than the heading sitting alone above an empty band. */
+    .inner {
+      grid-template-columns: 6fr 6fr;
+      column-gap: 40px;
+      align-items: end;
+      row-gap: 0;
+    }
     .ways {
       grid-template-columns: 1fr 1fr;
       column-gap: 24px;
+      padding-bottom: 0.5em;
     }
   }
 </style>

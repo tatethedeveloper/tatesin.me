@@ -42,7 +42,7 @@ const href = `/projects/${project.id}/`;
         </p>
       </div>
       <div class="visual" data-reveal>
-        {cover ? <img src={cover.src} width={cover.width} height={cover.height} alt="" loading="lazy" /> : <Placeholder label="PROJECT SCREENSHOT" block ratio="4 / 3" />}
+        {cover ? <img src={cover.src} width={cover.width} height={cover.height} alt="" loading="lazy" /> : <Placeholder label="PROJECT SCREENSHOT" block />}
       </div>
     </div>
   </div>
@@ -55,12 +55,15 @@ const href = `/projects/${project.id}/`;
     border-top: 1px solid var(--line);
     min-height: 100dvh;
     display: grid;
-    align-items: center;
+    align-items: stretch;
   }
+  /* Two rows: the status line, then everything else taking the rest of the
+     panel. Nothing is centred in a tall box, so no dead band above or below. */
   .inner {
     display: grid;
-    gap: clamp(32px, 6vh, 64px);
-    padding-block: clamp(64px, 12vh, 120px);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(24px, 4vh, 40px);
+    padding-block: clamp(40px, 7vh, 72px);
   }
   .status {
     display: flex;
@@ -99,7 +102,8 @@ const href = `/projects/${project.id}/`;
   }
   .body {
     display: grid;
-    gap: 40px;
+    gap: 32px;
+    align-content: start;
   }
   .text {
     display: grid;
@@ -131,6 +135,12 @@ const href = `/projects/${project.id}/`;
     flex-wrap: wrap;
     gap: 20px;
   }
+  .visual {
+    display: grid;
+    /* On narrow screens the frame keeps a picture shape; on wide screens it
+       stretches to the panel height instead (below). */
+    aspect-ratio: 4 / 3;
+  }
   .visual :global(img) {
     width: 100%;
     height: auto;
@@ -145,9 +155,29 @@ const href = `/projects/${project.id}/`;
   }
   @media (min-width: 1024px) {
     .body {
-      grid-template-columns: 6fr 5fr;
+      grid-template-columns: 6fr 6fr;
       column-gap: 64px;
-      align-items: center;
+      align-items: stretch;
+      align-content: stretch;
+    }
+    /* The visual is the thing that grows: it takes the panel's full height so
+       the panel reads as one composition rather than a line of text in a void. */
+    /* The text stays one block at the top of the panel; the visual beside it
+       is what takes the height. Nothing is pinned to the panel floor, which
+       the next panel covers as it slides over. */
+    .text {
+      align-content: start;
+      gap: 24px;
+    }
+    .visual {
+      aspect-ratio: auto;
+    }
+    .visual :global(.ph),
+    .visual :global(img) {
+      height: 100%;
+    }
+    .visual :global(img) {
+      object-fit: cover;
     }
     /* The stack: every panel pins at the top and the next one slides over it. */
     :global(html.js:not(.reduced)) .panel {

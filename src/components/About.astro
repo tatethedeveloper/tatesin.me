@@ -39,11 +39,11 @@ import Placeholder from './Placeholder.astro';
   .about {
     padding-block: var(--section);
     display: grid;
-    gap: 48px;
+    gap: 32px;
   }
   .cols {
     display: grid;
-    gap: 48px;
+    gap: 40px;
   }
   .prose {
     display: grid;
@@ -61,11 +61,17 @@ import Placeholder from './Placeholder.astro';
     border-top: 1px solid var(--line);
   }
   @media (min-width: 1024px) {
-    .cols {
-      grid-template-columns: 7fr 1fr 3fr;
+    /* The heading sits in the left column beside the prose rather than above
+       it, so the width the display type leaves over is used. */
+    .about {
+      grid-template-columns: 4fr 8fr;
+      column-gap: 24px;
+      align-items: start;
+      row-gap: 0;
     }
-    .facts {
-      grid-column: 3;
+    .cols {
+      grid-template-columns: 8fr 4fr;
+      column-gap: 40px;
     }
   }
 </style>

@@ -21,7 +21,7 @@
   --measure: 60ch;
   --nav-h: 64px;
   --margin: 24px;
-  --section: clamp(96px, 14vw, 200px);
+  --section: clamp(56px, 6vw, 96px);
   --max-w: 1440px;
 
   /* Entrances start fast; UI answers under 300ms. */
@@ -268,7 +268,11 @@ code {
 [data-rise] {
   display: block;
 }
-html.js:not(.reduced) [data-rise] {
+/* Hidden until the script takes over. The script removes this rule (by adding
+   `rise-ready` to the root) before it sets its own transform, so GSAP does not
+   read this one as the element's base transform and bake it into the finished
+   state. */
+html.js:not(.reduced):not(.rise-ready) [data-rise] {
   transform: translateY(110%);
 }
 

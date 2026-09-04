@@ -53,11 +53,16 @@ import Structure from './Structure.astro';
   }
 
   @media (min-width: 1024px) {
+    /* The three rows are spread over the viewport height rather than bunched
+       at the bottom: the role sits under the nav, the name in the middle band,
+       the pitch and the button on the floor. Nothing is left hanging empty. */
     .frame {
       grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: auto minmax(0, 1fr) auto;
       column-gap: 24px;
-      align-content: end;
+      align-content: stretch;
       row-gap: 0;
+      padding-top: clamp(24px, 5vh, 56px);
       padding-bottom: clamp(40px, 6vh, 72px);
     }
     /* Three rows on the left, the structure holding the right for all of
@@ -65,34 +70,33 @@ import Structure from './Structure.astro';
     .role {
       grid-column: 1 / span 4;
       grid-row: 1;
-      align-self: end;
-      margin-bottom: 20px;
+      align-self: start;
     }
     .display {
-      grid-column: 1 / span 7;
+      grid-column: 1 / span 6;
       grid-row: 2;
+      align-self: center;
     }
     .pitch {
       grid-column: 1 / span 4;
       grid-row: 3;
-      margin-top: 36px;
+      align-self: end;
       max-width: 34ch;
     }
     .cta {
-      grid-column: 5 / span 3;
+      grid-column: 5 / span 2;
       grid-row: 3;
-      align-self: start;
-      margin-top: 36px;
+      align-self: end;
     }
     .scene {
-      grid-column: 8 / -1;
+      grid-column: 7 / -1;
       grid-row: 1 / span 3;
       align-self: stretch;
       justify-self: stretch;
       width: 100%;
       display: grid;
       grid-template-rows: minmax(0, 1fr) auto;
-      min-height: min(72vh, 680px);
+      min-height: 0;
     }
   }
 
@@ -101,8 +105,12 @@ import Structure from './Structure.astro';
       align-content: start;
       padding-top: 24px;
     }
+    /* Two rows so the caption sits under the drawing instead of overflowing
+       the fixed height and landing on the pitch below. */
     .scene {
-      height: 46vh;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      min-height: 46vh;
       order: 3;
     }
     .role {
