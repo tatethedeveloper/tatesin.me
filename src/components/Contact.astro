@@ -5,15 +5,15 @@ import Placeholder from './Placeholder.astro';
 
 <section class="contact" id="contact" aria-labelledby="contact-title">
   <div class="wrap inner">
-    <h2 class="display" id="contact-title"><span class="mask"><span data-rise>Say hello</span></span></h2>
+    <h2 class="display-lg" id="contact-title"><span class="mask"><span data-rise>Say hello</span></span></h2>
     <div class="ways">
       <div class="way">
-        <p class="small mist">Email</p>
+        <p class="body-sm body">Email</p>
         {
           site.email ? (
             <p class="email-row">
-              <a class="lede" href={`mailto:${site.email}`}>{site.email}</a>
-              <button class="button ghost" type="button" data-copy={site.email}>
+              <a class="display-sm" href={`mailto:${site.email}`}>{site.email}</a>
+              <button class="button secondary" type="button" data-copy={site.email}>
                 Copy email
               </button>
             </p>
@@ -23,8 +23,8 @@ import Placeholder from './Placeholder.astro';
         }
       </div>
       <div class="way">
-        <p class="small mist">Elsewhere</p>
-        <p class="links lede">
+        <p class="body-sm body">Elsewhere</p>
+        <p class="links display-sm">
           {site.github ? <a href={site.github}>GitHub</a> : <Placeholder label="GITHUB URL" />}
           {site.linkedin ? <a href={site.linkedin}>LinkedIn</a> : <Placeholder label="LINKEDIN URL" />}
         </p>
@@ -35,48 +35,46 @@ import Placeholder from './Placeholder.astro';
 
 <style>
   .contact {
-    background: var(--panel);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hairline);
   }
   .inner {
     display: grid;
-    gap: 40px;
+    gap: var(--space-xxl);
     padding-block: var(--section);
   }
   .ways {
     display: grid;
-    gap: 40px;
+    gap: var(--space-xxl);
   }
   .way {
     display: grid;
-    gap: 12px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
+    gap: var(--space-sm);
+    padding-top: var(--space-base);
+    border-top: 1px solid var(--hairline);
   }
   .email-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 20px;
+    gap: var(--space-md);
   }
   .links {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: var(--space-lg);
   }
   @media (min-width: 1024px) {
     /* The heading and the two ways sit on one line, aligned on their baselines,
        rather than the heading sitting alone above an empty band. */
     .inner {
-      grid-template-columns: 6fr 6fr;
-      column-gap: 40px;
-      align-items: end;
+      grid-template-columns: 4fr 8fr;
+      column-gap: var(--space-lg);
+      align-items: start;
       row-gap: 0;
     }
     .ways {
       grid-template-columns: 1fr 1fr;
-      column-gap: 24px;
-      padding-bottom: 0.5em;
+      column-gap: var(--space-lg);
     }
   }
 </style>

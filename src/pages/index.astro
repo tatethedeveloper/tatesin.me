@@ -18,8 +18,19 @@ import Contact from '../components/Contact.astro';
 </Base>
 
 <script>
-  import { start } from '../scripts/motion';
   import { initGallery } from '../scripts/gallery';
-  start();
+
+  // The gallery's controls are small and answer input, so they are ready at once.
   initGallery();
+
+  // Scroll motion (Lenis + GSAP + ScrollTrigger, ~50kB gzipped) is not needed
+  // for anything above the fold: the hero intro is CSS. It loads once the page
+  // has, and the main thread is idle, so it never competes with first paint.
+  const loadMotion = () => import('../scripts/motion').then(({ start }) => start());
+  const whenIdle = () => {
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => loadMotion(), { timeout: 800 });
+    else window.setTimeout(loadMotion, 100);
+  };
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, { once: true });
 </script>

@@ -4,8 +4,8 @@
  * device is not low-powered and the visitor has not asked for reduced motion.
  *
  * Two layers:
- *  - The structure itself: rendered on demand (assembly, tilt settling,
- *    drag, hover, scroll).
+ *  - The structure itself, ink on the canvas: rendered on demand (assembly,
+ *    tilt settling, drag, hover, scroll).
  *  - The field beneath it: a sparse ground of points joined to their near
  *    neighbours, drifting slowly (the idea is Vanta's NET/dots, built here on
  *    the same renderer rather than a second Three.js). It runs a light loop
@@ -26,7 +26,6 @@ import { Vector3 } from 'three/src/math/Vector3.js';
 import { Quaternion } from 'three/src/math/Quaternion.js';
 import { Matrix4 } from 'three/src/math/Matrix4.js';
 import { Color } from 'three/src/math/Color.js';
-import { AdditiveBlending } from 'three/src/constants.js';
 import { Points } from 'three/src/objects/Points.js';
 import { PointsMaterial } from 'three/src/materials/PointsMaterial.js';
 import { LineSegments } from 'three/src/objects/LineSegments.js';
@@ -43,10 +42,11 @@ export interface StructureData {
   commits: { h: string; s: string; d: string }[];
 }
 
-const GROUND = new Color('#0b1224');
-const STRUT_COLOR = new Color('#c9cfdd');
-const NODE_COLOR = new Color('#ede9e3');
-const PULSE = new Color('#ffb238');
+// Colours match the tokens in global.css: canvas, body, ink, primary.
+const GROUND = new Color('#f7f7f4');
+const STRUT_COLOR = new Color('#5a5852');
+const NODE_COLOR = new Color('#26251e');
+const PULSE = new Color('#f54e00');
 const ASSEMBLE_MS = 1400;
 /** Strut thickness in lattice units. Real geometry, so it survives any DPR. */
 const STRUT = 0.04;
@@ -102,21 +102,13 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   const strutGeo = new BoxGeometry(1, 1, 1);
   const strutMat = new MeshBasicMaterial();
   const strutMesh = new InstancedMesh(strutGeo, strutMat, n);
-  // A second, wider pass at low opacity reads as light bleeding off the strut.
-  const glowMat = new MeshBasicMaterial({ transparent: true, opacity: 0.16, blending: AdditiveBlending, depthWrite: false });
-  const glowMesh = new InstancedMesh(strutGeo, glowMat, n);
-  const paint = (i: number, c: Color) => {
-    strutMesh.setColorAt(i, c);
-    glowMesh.setColorAt(i, c);
-  };
+  const paint = (i: number, c: Color) => strutMesh.setColorAt(i, c);
   for (let i = 0; i < n; i++) {
     setStrut(strutMesh, i, 1, STRUT);
-    setStrut(glowMesh, i, 1, STRUT * 4);
     paint(i, i === n - 1 ? PULSE : STRUT_COLOR);
   }
   const colorsDirty = () => {
     if (strutMesh.instanceColor) strutMesh.instanceColor.needsUpdate = true;
-    if (glowMesh.instanceColor) glowMesh.instanceColor.needsUpdate = true;
   };
 
   const nodeGeo = new BoxGeometry(NODE, NODE, NODE);
@@ -156,17 +148,17 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   const fieldPos = new Float32Array(base);
   const pointGeo = new BufferGeometry();
   pointGeo.setAttribute('position', new Float32BufferAttribute(fieldPos, 3));
-  const pointMat = new PointsMaterial({ color: STRUT_COLOR, size: 0.045, transparent: true, opacity: 0.55, depthWrite: false });
+  const pointMat = new PointsMaterial({ color: NODE_COLOR, size: 0.045, transparent: true, opacity: 0.45, depthWrite: false });
   const points = new Points(pointGeo, pointMat);
   const linePos = new Float32Array(pairs.length * 3);
   const lineGeo = new BufferGeometry();
   lineGeo.setAttribute('position', new Float32BufferAttribute(linePos, 3));
-  const lineMat = new LineBasicMaterial({ color: STRUT_COLOR, transparent: true, opacity: 0.12, depthWrite: false });
+  const lineMat = new LineBasicMaterial({ color: NODE_COLOR, transparent: true, opacity: 0.1, depthWrite: false });
   const lines = new LineSegments(lineGeo, lineMat);
   const field = new Group();
   field.add(lines, points);
-  const FIELD_POINT_OPACITY = 0.55;
-  const FIELD_LINE_OPACITY = 0.12;
+  const FIELD_POINT_OPACITY = 0.45;
+  const FIELD_LINE_OPACITY = 0.1;
   const driftField = (t: number) => {
     const amp = 0.09;
     for (let i = 0; i < FIELD_N; i++) {
@@ -184,7 +176,7 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   driftField(0);
 
   const group = new Group();
-  group.add(field, glowMesh, strutMesh, nodeMesh);
+  group.add(field, strutMesh, nodeMesh);
   group.position.copy(centre).negate();
   const rig = new Group();
   rig.add(group);
@@ -278,7 +270,6 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   // present first so raycasting works for the life of the scene.
   strutMesh.computeBoundingSphere();
   strutMesh.frustumCulled = false;
-  glowMesh.frustumCulled = false;
   const stagger = 0.6; // share of the total time spent staggering starts
   const each = ASSEMBLE_MS * (1 - stagger);
   let start = 0;
@@ -292,10 +283,8 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
       if (p < 1) done = false;
       const e = EASE_OUT(p);
       setStrut(strutMesh, i, e, STRUT);
-      setStrut(glowMesh, i, e, STRUT * 4);
     }
     strutMesh.instanceMatrix.needsUpdate = true;
-    glowMesh.instanceMatrix.needsUpdate = true;
     renderer.render(scene, camera);
     if (!done) requestAnimationFrame(assemble);
     else {
@@ -461,14 +450,12 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
       strutGeo.dispose();
       nodeGeo.dispose();
       strutMat.dispose();
-      glowMat.dispose();
       nodeMat.dispose();
       pointGeo.dispose();
       lineGeo.dispose();
       pointMat.dispose();
       lineMat.dispose();
       strutMesh.dispose();
-      glowMesh.dispose();
       nodeMesh.dispose();
       renderer.dispose();
     },

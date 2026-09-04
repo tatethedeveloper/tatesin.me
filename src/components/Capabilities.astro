@@ -9,14 +9,14 @@ import Placeholder from './Placeholder.astro';
 ---
 
 <section class="caps wrap" aria-labelledby="caps-title">
-  <h2 class="h2 mist" id="caps-title">Where I am with tools</h2>
+  <h2 class="display-lg" id="caps-title">Where I am with tools</h2>
   <div class="groups">
     {
       skills.map((g) => (
         <div class="group">
-          <h3 class="lede">{g.heading}</h3>
+          <h3 class="title-md">{g.heading}</h3>
           {g.items.length ? (
-            <ul class="items title">
+            <ul class="items display-sm">
               {g.items.map((item) => (
                 <li>{item}</li>
               ))}
@@ -34,37 +34,38 @@ import Placeholder from './Placeholder.astro';
   .caps {
     padding-block: var(--section);
     display: grid;
-    gap: 32px;
+    gap: var(--space-xl);
   }
   .groups {
     display: grid;
-    gap: 32px;
+    gap: var(--space-xl);
   }
   .group {
     display: grid;
-    gap: 20px;
-    padding-top: 24px;
-    border-top: 1px solid var(--line);
+    gap: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--hairline);
   }
   .items {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.15em 0.6em;
+    gap: 0.15em 0.5em;
+    color: var(--body);
   }
   .items li:not(:last-child)::after {
     content: ',';
   }
   @media (min-width: 1024px) {
     .caps {
-      grid-template-columns: 3fr 9fr;
-      column-gap: 24px;
+      grid-template-columns: 4fr 8fr;
+      column-gap: var(--space-lg);
     }
     .groups {
       grid-column: 2;
     }
     .group {
       grid-template-columns: 2fr 7fr;
-      column-gap: 24px;
+      column-gap: var(--space-lg);
       align-items: start;
     }
   }

@@ -5,7 +5,10 @@ const isHome = Astro.url.pathname === '/';
 
 <header class="nav" data-nav>
   <div class="wrap bar">
-    <a class="brand" href="/">{site.name}</a>
+    <a class="brand" href="/">
+      <span class="node" aria-hidden="true"></span>
+      {site.name}
+    </a>
     <nav aria-label="Primary">
       <ul>
         {
@@ -30,9 +33,9 @@ const isHome = Astro.url.pathname === '/';
     right: 0;
     z-index: 20;
     height: var(--nav-h);
-    /* Type inverts over whatever is behind it, so the bar needs no fill. */
-    mix-blend-mode: difference;
-    color: #fff;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline-soft);
+    color: var(--ink);
   }
   .bar {
     display: flex;
@@ -43,7 +46,21 @@ const isHome = Astro.url.pathname === '/';
   .brand,
   nav a {
     text-decoration: none;
+    font-size: 14px;
     font-weight: 500;
+    line-height: 1.4;
+  }
+  /* The wordmark's one touch of the accent: a node, not the letters. Orange
+     text on the canvas is 3.3:1, under AA; a 10px square is not text. */
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .node {
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
   }
   nav ul {
     display: flex;
@@ -52,6 +69,8 @@ const isHome = Astro.url.pathname === '/';
   nav a {
     position: relative;
     padding-block: 6px;
+    color: var(--body);
+    transition: color var(--dur) var(--ease-out);
   }
   nav a::after {
     content: '';
@@ -65,17 +84,37 @@ const isHome = Astro.url.pathname === '/';
     transform-origin: left;
     transition: transform 200ms var(--ease-out);
   }
+  nav a[aria-current='true'] {
+    color: var(--ink);
+  }
   nav a[aria-current='true']::after {
     transform: scaleX(1);
   }
   @media (hover: hover) and (pointer: fine) {
+    nav a:hover {
+      color: var(--ink);
+    }
     nav a:hover::after {
       transform: scaleX(1);
     }
   }
   @media (max-width: 480px) {
     nav ul {
-      gap: 18px;
+      gap: 16px;
+    }
+    .brand {
+      gap: 8px;
+    }
+  }
+  /* Under 360 the name and three links do not share a line; the node stands
+     in for the name, which the page's h1 says anyway. */
+  @media (max-width: 359px) {
+    .brand {
+      font-size: 0;
+    }
+    .node {
+      width: 12px;
+      height: 12px;
     }
   }
 </style>

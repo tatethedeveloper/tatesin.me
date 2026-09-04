@@ -55,7 +55,7 @@ export function dotBloom(host: HTMLElement, { gap = 26, speed = 1 }: Options = {
   let rows = 0;
   let originX = 0;
   let originY = 0;
-  let colour = '#98a1b8';
+  let colour = '#26251e';
   let raf = 0;
   let visible = false;
   let last = 0;
@@ -105,12 +105,11 @@ export function dotBloom(host: HTMLElement, { gap = 26, speed = 1 }: Options = {
         const e = Math.min(1, Math.max(0, (n - 0.42) / 0.44));
         const bloom = e * e * (3 - 2 * e);
 
-        // Capped deliberately. A dot is the same hue as the body copy, so the
-        // worst case is a paragraph read against a dot at full bloom: at 0.20
-        // that pair is 4.96:1, and by a quarter opacity it has dropped under
-        // AA. Size carries the bloom instead — which is what a halftone does
-        // anyway.
-        ctx.globalAlpha = 0.05 + bloom * 0.15;
+        // Capped deliberately. The dots are ink on the canvas, so the worst
+        // case is body copy read against a dot at full bloom: at 0.15 that
+        // pair is 4.9:1, and by a fifth it has dropped under AA. Size carries
+        // the bloom instead — which is what a halftone does anyway.
+        ctx.globalAlpha = 0.04 + bloom * 0.11;
         const r = 0.6 + bloom * (gap * 0.22);
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);

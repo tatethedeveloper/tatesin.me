@@ -46,19 +46,21 @@ const viewBox = `${minX - (side - w) / 2} ${minY - (side - h) / 2} ${side} ${sid
       }
       .name {
         font-size: 84px;
-        font-weight: 500;
-        line-height: 1;
-        letter-spacing: -0.035em;
+        font-weight: 400;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
       }
       .line {
         margin-top: 24px;
         font-size: 30px;
         line-height: 1.3;
-        max-width: 18ch;
+        max-width: 20ch;
+        color: var(--body);
       }
-      .url { color: var(--mist);
+      .url {
+        color: var(--body);
         margin-top: 48px;
-        font-size: 24px;
+        font-size: 22px;
       }
       svg {
         width: 480px;
@@ -71,21 +73,21 @@ const viewBox = `${minX - (side - w) / 2} ${minY - (side - h) / 2} ${side} ${sid
       <div>
         <div class="name">{site.name}</div>
         <div class="line">{site.role} in {site.location}. Early career, building in the open.</div>
-        <div class="url mono">tatesin.me</div>
+        <div class="url code">tatesin.me</div>
       </div>
       <svg viewBox={viewBox} aria-hidden="true">
-        <g fill="none" stroke="#c9cfdd" stroke-width="0.035" stroke-linecap="round">
+        <g fill="none" stroke="var(--body)" stroke-width="0.035" stroke-linecap="round">
           {
             struts.map((s, i) => {
               const [x1, y1] = project(s.a, centre);
               const [x2, y2] = project(s.b, centre);
               return (
-                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={i === struts.length - 1 ? 'var(--pulse)' : undefined} />
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={i === struts.length - 1 ? 'var(--primary)' : undefined} />
               );
             })
           }
         </g>
-        <g fill="var(--bone)">
+        <g fill="var(--ink)">
           {
             nodes.map((p) => {
               const [x, y] = project(p, centre);

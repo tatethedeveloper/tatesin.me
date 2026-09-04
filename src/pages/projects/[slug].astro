@@ -17,38 +17,38 @@ const { Content } = await render(project);
 <Base title={title} description={summary} path={`/projects/${project.id}/`}>
   <article class:list={['study', status]}>
     <header class="wrap head">
-      <p class="small"><a href="/#work">All work</a></p>
-      <p class="status">
+      <p class="body-sm"><a href="/#work">All work</a></p>
+      <p class="status title-sm">
         <span class="mark" aria-hidden="true"></span>
         {statusLabel[status]}{status === 'building' ? ' now' : ''}
-        {placeholder && <span class="ph-mark mono">Placeholder project</span>}
+        {placeholder && <span class="badge">Placeholder project</span>}
       </p>
-      <h1 class="display">{title}</h1>
-      <p class="lede measure mist">{summary}</p>
+      <h1 class="display-lg">{title}</h1>
+      <p class="display-sm measure body">{summary}</p>
     </header>
 
     <div class="wrap visual" aria-hidden={cover ? undefined : 'true'}>
       {cover ? <img src={cover.src} width={cover.width} height={cover.height} alt="" /> : <Placeholder label="PROJECT SCREENSHOT OR RECORDING" block ratio="16 / 9" />}
     </div>
 
-    <div class="wrap body">
-      <dl class="facts small">
+    <div class="wrap study-body">
+      <dl class="facts body-sm">
         <div>
-          <dt class="mist">Role</dt>
+          <dt class="body">Role</dt>
           <dd>{role}</dd>
         </div>
         <div>
-          <dt class="mist">Year</dt>
-          <dd class="mono">{year}</dd>
+          <dt class="body">Year</dt>
+          <dd class="code">{year}</dd>
         </div>
         <div>
-          <dt class="mist">Stack</dt>
-          <dd class="mono stack">{stack.map((s) => <span>{s}</span>)}</dd>
+          <dt class="body">Stack</dt>
+          <dd class="code stack">{stack.map((s) => <span>{s}</span>)}</dd>
         </div>
         {
           (repo || demo) && (
             <div>
-              <dt class="mist">Links</dt>
+              <dt class="body">Links</dt>
               <dd class="links">
                 {repo && <a href={repo}>Repository</a>}
                 {demo && <a href={demo}>Demo</a>}
@@ -68,64 +68,54 @@ const { Content } = await render(project);
 <style>
   .head {
     display: grid;
-    gap: 24px;
-    padding-top: calc(var(--nav-h) + clamp(40px, 8vw, 96px));
-    padding-bottom: clamp(40px, 6vw, 72px);
+    gap: var(--space-lg);
+    padding-top: calc(var(--nav-h) + var(--section));
+    padding-bottom: var(--space-xxl);
   }
   .status {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-weight: 500;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .mark {
-    width: 12px;
-    height: 12px;
-    border: 1px solid var(--bone);
-  }
-  .building .mark {
-    background: var(--pulse);
-    border-color: var(--pulse);
-  }
-  .building .status {
-    color: var(--pulse);
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--ink);
   }
   .shipped .mark {
-    background: var(--bone);
+    background: var(--ink);
   }
   .planned .mark {
     border-style: dashed;
-    border-color: var(--mist);
   }
   .planned .status {
-    color: var(--mist);
-  }
-  .ph-mark {
-    margin-left: 12px;
-    padding: 2px 8px;
-    border: 1px dashed var(--pulse);
-    color: var(--pulse);
-    font-weight: 400;
+    color: var(--body);
   }
   .visual :global(img) {
     width: 100%;
     height: auto;
+    border-radius: var(--rounded-lg);
+    border: 1px solid var(--hairline);
   }
-  .body {
+  .study-body {
     display: grid;
-    gap: 48px;
-    padding-block: clamp(48px, 8vw, 96px) var(--section);
+    gap: var(--space-xxl);
+    padding-block: var(--space-xxl) var(--section);
   }
   .facts {
     display: grid;
-    gap: 20px;
+    gap: var(--space-md);
     align-content: start;
   }
   .facts div {
     display: grid;
-    gap: 4px;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
+    gap: var(--space-xxs);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--hairline);
+  }
+  .facts dd {
+    font-weight: 500;
   }
   .stack {
     display: flex;
@@ -134,21 +124,22 @@ const { Content } = await render(project);
   }
   .links {
     display: flex;
-    gap: 16px;
+    gap: var(--space-base);
+  }
+  .prose {
+    color: var(--body);
   }
   .prose :global(h2) {
-    font-size: var(--text-h2);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.015em;
-    margin-top: 56px;
-    margin-bottom: 16px;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.0125em;
+    color: var(--ink);
+    margin-top: var(--space-xxl);
+    margin-bottom: var(--space-base);
   }
   .prose :global(h2:first-child) {
     margin-top: 0;
-  }
-  .prose :global(p) {
-    color: var(--mist);
   }
   .prose :global(p + p) {
     margin-top: 1em;
@@ -156,13 +147,19 @@ const { Content } = await render(project);
   .prose :global(ul) {
     list-style: disc;
     padding-left: 1.2em;
-    color: var(--mist);
   }
   .prose :global(img) {
-    border: 1px solid var(--line);
+    border: 1px solid var(--hairline);
+    border-radius: var(--rounded-lg);
+  }
+  .prose :global(code) {
+    padding: 1px 5px;
+    border-radius: var(--rounded-xs);
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
   }
   @media (min-width: 1024px) {
-    .body {
+    .study-body {
       grid-template-columns: 3fr 1fr 8fr;
     }
     .prose {

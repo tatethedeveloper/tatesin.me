@@ -39,17 +39,17 @@ const data = {
 
 <div class="stage" data-stage aria-hidden="true">
   <svg class="fallback" viewBox={viewBox} data-fallback>
-    <g fill="none" stroke="#c9cfdd" stroke-width={strokeW} stroke-linecap="round">
+    <g fill="none" stroke="var(--body)" stroke-width={strokeW} stroke-linecap="round">
       {
         struts.map((s, i) => {
           const [x1, y1] = project(s.a, centre);
           const [x2, y2] = project(s.b, centre);
           const last = i === struts.length - 1;
-          return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={last ? 'var(--pulse)' : undefined} />;
+          return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={last ? 'var(--primary)' : undefined} />;
         })
       }
     </g>
-    <g fill="var(--bone)">
+    <g fill="var(--ink)">
       {
         nodes.map((p) => {
           const [x, y] = project(p, centre);
@@ -58,10 +58,10 @@ const data = {
       }
     </g>
   </svg>
-  <div class="tip mono" data-tip hidden></div>
+  <div class="tip code" data-tip hidden></div>
 </div>
 
-<p class="caption small mist" data-caption>
+<p class="caption body-sm body" data-caption>
   {
     count === 0 ? (
       <span>This site's own history will be drawn here once it has one.</span>
@@ -87,8 +87,6 @@ const data = {
   .fallback {
     width: 100%;
     height: 100%;
-    /* The SVG is the same drawing as the scene; give it a little of the glow. */
-    filter: drop-shadow(0 0 12px rgb(201 207 221 / 0.25));
   }
   .stage :global(canvas) {
     position: absolute;
@@ -105,8 +103,10 @@ const data = {
     z-index: 2;
     max-width: 36ch;
     padding: 8px 12px;
-    background: var(--bone);
-    color: var(--ground);
+    border: 1px solid var(--hairline);
+    border-radius: var(--rounded-md);
+    background: var(--surface-card);
+    color: var(--ink);
     pointer-events: none;
     transform: translate(14px, 14px);
   }
@@ -114,7 +114,7 @@ const data = {
     display: block;
   }
   .tip :global(.when) {
-    opacity: 0.6;
+    color: var(--body);
   }
   .caption {
     display: grid;
@@ -122,7 +122,7 @@ const data = {
     max-width: 40ch;
     justify-self: end;
     text-align: right;
-    margin-top: 20px;
+    margin-top: var(--space-md);
   }
   @media (max-width: 1023px) {
     .caption {
@@ -163,7 +163,7 @@ const data = {
             /* SVG stays. */
           });
       const whenIdle = () => {
-        if ('requestIdleCallback' in window) window.requestIdleCallback(() => load(), { timeout: 1500 });
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => load(), { timeout: 1500 });
         else window.setTimeout(load, 200);
       };
       if (document.readyState === 'complete') whenIdle();

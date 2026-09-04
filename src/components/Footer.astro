@@ -4,20 +4,21 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="foot">
-  <div class="wrap row small mist">
+  <div class="wrap row body-sm body">
     <span>{site.name}, {year}</span>
+    {site.repo && <a href={site.repo}>Source on GitHub</a>}
   </div>
 </footer>
 
 <style>
   .foot {
-    border-top: 1px solid var(--line);
-    padding-block: 28px;
+    border-top: 1px solid var(--hairline);
+    padding-block: var(--space-xxl);
   }
   .row {
     display: flex;
     justify-content: space-between;
-    gap: 24px;
+    gap: var(--space-lg);
     flex-wrap: wrap;
   }
 </style>

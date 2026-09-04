@@ -5,32 +5,38 @@ import Placeholder from './Placeholder.astro';
 ---
 
 <section class="about wrap" id="about" aria-labelledby="about-title">
-  <h2 class="display" id="about-title"><span class="mask"><span data-rise>About</span></span></h2>
+  <h2 class="display-lg" id="about-title"><span class="mask"><span data-rise>About</span></span></h2>
   <div class="cols">
     <div class="prose">
       {
         about.map((b) =>
-          'text' in b ? <p class="lede measure">{b.text}</p> : <Placeholder label={b.placeholder} block />,
+          'text' in b ? <p class="display-sm body">{b.text}</p> : <Placeholder label={b.placeholder} block />,
         )
       }
     </div>
-    <dl class="facts small">
+    <dl class="facts body-sm">
       <div>
-        <dt class="mist">Role</dt>
+        <dt class="body">Role</dt>
         <dd>{site.role}</dd>
       </div>
       <div>
-        <dt class="mist">Based in</dt>
+        <dt class="body">Based in</dt>
         <dd>{site.location}</dd>
       </div>
       <div>
-        <dt class="mist">Stage</dt>
+        <dt class="body">Stage</dt>
         <dd>Early career</dd>
       </div>
-      <div>
-        <dt class="mist">This site</dt>
-        <dd><a href={site.repo}>Built in the open</a></dd>
-      </div>
+      {
+        site.repo && (
+          <div>
+            <dt class="body">This site</dt>
+            <dd>
+              <a href={site.repo}>Built in the open</a>
+            </dd>
+          </div>
+        )
+      }
     </dl>
   </div>
 </section>
@@ -39,39 +45,43 @@ import Placeholder from './Placeholder.astro';
   .about {
     padding-block: var(--section);
     display: grid;
-    gap: 32px;
+    gap: var(--space-xl);
   }
   .cols {
     display: grid;
-    gap: 40px;
+    gap: var(--space-xxl);
   }
   .prose {
     display: grid;
-    gap: 24px;
+    gap: var(--space-lg);
+    max-width: var(--measure);
   }
   .facts {
     display: grid;
-    gap: 16px;
+    gap: var(--space-base);
     align-content: start;
   }
   .facts div {
     display: grid;
     gap: 2px;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--hairline);
+  }
+  .facts dd {
+    font-weight: 500;
   }
   @media (min-width: 1024px) {
     /* The heading sits in the left column beside the prose rather than above
        it, so the width the display type leaves over is used. */
     .about {
       grid-template-columns: 4fr 8fr;
-      column-gap: 24px;
+      column-gap: var(--space-lg);
       align-items: start;
       row-gap: 0;
     }
     .cols {
       grid-template-columns: 8fr 4fr;
-      column-gap: 40px;
+      column-gap: var(--space-xxl);
     }
   }
 </style>

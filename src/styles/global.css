@@ -1,28 +1,62 @@
-/* Tokens. See docs/design-plan.md for the reasoning behind each value. */
+/* Tokens. Names and values follow DESIGN.md; docs/design-plan.md records
+   where the site departs from it and why (all of them are contrast). */
 :root {
-  --ground: #0b1224;
-  --panel: #131c35;
-  --line: #26304a;
-  --bone: #ede9e3;
-  --mist: #98a1b8;
-  --pulse: #ffb238;
+  /* Surfaces */
+  --canvas: #f7f7f4;
+  --canvas-soft: #fafaf7;
+  --surface-card: #ffffff;
+  --surface-strong: #e6e5e0;
 
-  --font-sans: 'Bricolage Grotesque', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Hairlines */
+  --hairline: #e6e5e0;
+  --hairline-soft: #efeee8;
+  --hairline-strong: #cfcdc4;
 
-  --text-display: clamp(3.5rem, 11vw, 10rem);
-  --text-title: clamp(2.25rem, 5.5vw, 4.5rem);
-  --text-h2: clamp(1.75rem, 3vw, 2.5rem);
-  --text-lede: clamp(1.25rem, 1.8vw, 1.5rem);
-  --text-body: 1.125rem;
-  --text-small: 0.9375rem;
-  --text-mono: 0.875rem;
+  /* Text. `--muted` is 3.6:1 on the canvas, so it is only ever used at
+     display sizes (24px+), where 3:1 is the floor. Running text is `--body`. */
+  --ink: #26251e;
+  --body: #5a5852;
+  --muted: #807d72;
+  --muted-soft: #a09c92;
+  --on-primary: #ffffff;
 
-  --measure: 60ch;
+  /* Brand. One accent, used scarcely: the wordmark's node, the newest strut,
+     and focus rings. Never behind text — orange fails AA against both white
+     and ink, so no button carries it. */
+  --primary: #f54e00;
+  --primary-active: #d04200;
+
+  /* Semantic. Error marks the placeholders: a fact that is missing is a
+     defect in the page, and it should look like one. */
+  --success: #1f8a65;
+  --error: #cf2d56;
+
+  --font-sans: 'Inter Variable', Inter, system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Spacing: 4px base. */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-base: 16px;
+  --space-md: 20px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+  --section: 80px;
+
+  /* Radius */
+  --rounded-xs: 4px;
+  --rounded-sm: 6px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-pill: 9999px;
+
+  --measure: 64ch;
   --nav-h: 64px;
   --margin: 24px;
-  --section: clamp(56px, 6vw, 96px);
-  --max-w: 1440px;
+  --max-w: 1200px;
 
   /* Entrances start fast; UI answers under 300ms. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -36,20 +70,20 @@
 }
 
 @font-face {
-  font-family: 'Bricolage Grotesque';
+  font-family: 'Inter Variable';
   font-style: normal;
-  font-weight: 200 800;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/bricolage-grotesque-latin-variable.woff2') format('woff2-variations');
+  src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'IBM Plex Mono';
+  font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -63,16 +97,16 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: calc(var(--nav-h) + 16px);
-  background: var(--ground);
+  background: var(--canvas);
 }
 body {
   margin: 0;
-  background: var(--ground);
-  color: var(--bone);
+  background: var(--canvas);
+  color: var(--ink);
   font-family: var(--font-sans);
-  font-size: var(--text-body);
+  font-size: 16px;
   line-height: 1.5;
-  font-feature-settings: 'kern', 'liga';
+  font-feature-settings: 'kern', 'liga', 'cv11';
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -109,12 +143,12 @@ a {
   color: inherit;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--line);
+  text-decoration-color: var(--hairline-strong);
   transition: text-decoration-color var(--dur) var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   a:hover {
-    text-decoration-color: var(--pulse);
+    text-decoration-color: currentColor;
   }
 }
 code {
@@ -122,55 +156,96 @@ code {
   font-size: 0.92em;
 }
 ::selection {
-  background: var(--pulse);
-  color: var(--ground);
+  background: var(--ink);
+  color: var(--canvas);
 }
 
-/* Focus: one ring, visible on every surface. */
+/* Focus: one ring, visible on every surface. Orange is 3.3:1 on the canvas,
+   which clears the 3:1 floor for non-text. */
 :focus-visible {
-  outline: 2px solid var(--pulse);
+  outline: 2px solid var(--primary);
   outline-offset: 3px;
 }
 :focus:not(:focus-visible) {
   outline: none;
 }
 
-/* Type roles. Weight 500 across display sizes; the size does the hierarchy. */
-.display {
-  font-size: var(--text-display);
-  font-weight: 500;
-  line-height: 0.92;
-  letter-spacing: -0.035em;
-}
-.title {
-  font-size: var(--text-title);
-  font-weight: 500;
-  line-height: 0.98;
-  letter-spacing: -0.025em;
-}
-.h2 {
-  font-size: var(--text-h2);
-  font-weight: 500;
+/* Type roles, named as DESIGN.md names them. Display stays at 400 with
+   negative tracking; only titles carry weight. */
+.display-mega {
+  font-size: 32px;
+  font-weight: 400;
   line-height: 1.1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.03em;
 }
-.lede {
-  font-size: var(--text-lede);
-  line-height: 1.35;
+@media (min-width: 640px) {
+  .display-mega {
+    font-size: 56px;
+  }
+}
+@media (min-width: 1024px) {
+  .display-mega {
+    font-size: 72px;
+  }
+}
+.display-lg {
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.display-md {
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.0125em;
+}
+.display-sm {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.3;
   letter-spacing: -0.005em;
 }
-.small {
-  font-size: var(--text-small);
-  line-height: 1.45;
+.title-md {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
 }
-.mono {
+.title-sm {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.body-md {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.body-sm {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.caption {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.caption-uppercase {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.code {
   font-family: var(--font-mono);
-  font-size: var(--text-mono);
+  font-size: 13px;
   line-height: 1.5;
   letter-spacing: 0;
 }
-.mist {
-  color: var(--mist);
+.body {
+  color: var(--body);
+}
+.muted {
+  color: var(--muted);
 }
 .measure {
   max-width: var(--measure);
@@ -179,7 +254,7 @@ code {
 /* Layout. */
 .wrap {
   width: 100%;
-  max-width: var(--max-w);
+  max-width: calc(var(--max-w) + 2 * var(--margin));
   margin-inline: auto;
   padding-inline: var(--margin);
 }
@@ -189,27 +264,33 @@ code {
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
+  gap: var(--space-xl);
 }
 @media (min-width: 1024px) {
   .grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 24px;
+    column-gap: var(--space-lg);
   }
 }
 
-/* Buttons: full pill, the one rounded thing on the page. */
+/* Buttons. The ink button is DESIGN.md's `button-download`, which is the
+   CTA its hero band uses; the white one is `button-secondary`. There is no
+   orange button: white on orange is 3.5:1 and ink on orange 4.3:1, and both
+   are under AA for a 14px label. */
 .button {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  min-height: 52px;
-  padding: 0 28px;
-  border: 1px solid var(--bone);
-  border-radius: 999px;
-  background: var(--bone);
-  color: var(--ground);
+  justify-content: center;
+  gap: var(--space-xs);
+  height: 44px;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--ink);
+  border-radius: var(--rounded-md);
+  background: var(--ink);
+  color: var(--canvas);
+  font-size: 14px;
   font-weight: 500;
+  line-height: 1;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -224,21 +305,37 @@ code {
 }
 @media (hover: hover) and (pointer: fine) {
   .button:hover {
-    background: var(--pulse);
-    border-color: var(--pulse);
+    background: var(--body);
+    border-color: var(--body);
   }
 }
-.button.ghost {
-  background: transparent;
-  color: var(--bone);
-  border-color: var(--line);
+.button.secondary {
+  height: 40px;
+  padding: 0 18px;
+  background: var(--surface-card);
+  color: var(--ink);
+  border-color: var(--hairline-strong);
 }
 @media (hover: hover) and (pointer: fine) {
-  .button.ghost:hover {
-    background: transparent;
-    color: var(--pulse);
-    border-color: var(--pulse);
+  .button.secondary:hover {
+    background: var(--surface-card);
+    border-color: var(--ink);
   }
+}
+
+/* Badge: small uppercase pill on the strong surface. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--rounded-pill);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .skip-link {
@@ -247,9 +344,9 @@ code {
   left: 12px;
   z-index: 100;
   padding: 10px 16px;
-  background: var(--pulse);
-  color: var(--ground);
-  border-radius: 999px;
+  background: var(--ink);
+  color: var(--canvas);
+  border-radius: var(--rounded-md);
   font-weight: 500;
   text-decoration: none;
   transform: translateY(-200%);
@@ -290,7 +387,7 @@ html.js:not(.reduced):not(.rise-ready) [data-rise] {
 /* Hairline between things. Only ever between two things. */
 .rule {
   border: 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--hairline);
   margin: 0;
 }
 

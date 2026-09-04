@@ -1,8 +1,8 @@
 ---
 /**
  * One long line of display text between the hero and the work. Each word is
- * wrapped so the motion script can brighten them in reading order as the
- * visitor scrolls; without script every word is already bright.
+ * wrapped so the motion script can bring them up to ink in reading order as
+ * the visitor scrolls; without script every word is already ink.
  * TODO(tate): this is written in your voice from the brief. Edit freely.
  */
 const text =
@@ -11,7 +11,7 @@ const words = text.split(' ');
 ---
 
 <section class="statement wrap" aria-label="Statement">
-  <p class="title" data-words>
+  <p class="display-md" data-words>
     {words.map((w) => <span class="w">{w} </span>)}
   </p>
 </section>
@@ -20,19 +20,20 @@ const words = text.split(' ');
   .statement {
     padding-block: var(--section);
   }
-  .title {
-    max-width: 28ch;
+  .display-md {
+    max-width: 40ch;
   }
   .w {
     display: inline;
-    color: var(--bone);
+    color: var(--ink);
     transition: color 200ms var(--ease-out);
   }
-  /* With script and motion allowed, words start dim and brighten on scroll. */
+  /* With script and motion allowed, words start muted and come up to ink on
+     scroll. Muted is 3.6:1 on the canvas, which clears 3:1 at this size. */
   :global(html.js:not(.reduced)) .w {
-    color: var(--line);
+    color: var(--muted);
   }
   :global(html.js:not(.reduced)) .w.on {
-    color: var(--bone);
+    color: var(--ink);
   }
 </style>

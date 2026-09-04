@@ -4,8 +4,8 @@ import Base from '../layouts/Base.astro';
 
 <Base title="Not found" description="That page doesn't exist." path="/404/">
   <section class="wrap section" style="padding-top: calc(var(--nav-h) + var(--section))">
-    <h1 class="display">Not found</h1>
-    <p class="measure lede">
+    <h1 class="display-lg">Not found</h1>
+    <p class="measure display-sm body">
       There's nothing at this address. It may have moved while I was rebuilding, or the link was
       wrong.
     </p>
@@ -17,13 +17,12 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
-  .lede {
-    margin-top: 16px;
-    color: var(--mist);
+  .display-sm {
+    margin-top: var(--space-base);
   }
   .options {
-    margin-top: 32px;
+    margin-top: var(--space-xl);
     display: grid;
-    gap: 8px;
+    gap: var(--space-xs);
   }
 </style>

@@ -1,225 +1,155 @@
-# Design plan (v2: creative-studio redesign)
+# Design plan (v3: DESIGN.md, editorial cream)
 
-Supersedes `design-plan-v1.md`. Written before UI code, reviewed once for
-genericness; revisions are listed at the end.
+Supersedes `design-plan-v2.md` (dark creative-studio) and `design-plan-v1.md`
+(blueprint). Written against `DESIGN.md` at the repository root, which Tate
+supplied on 4 Sep 2026 and named as the source of truth for the visual system.
+Where this plan departs from DESIGN.md it says so and says why; every
+departure is a contrast floor.
 
-## Design read
+## Decisions Tate made, 4 Sep 2026
 
-Reading this as: a developer portfolio, overhaul mode, for hiring managers
-and collaborators, with an immersive creative-studio language (Lusion's
-ambition, Auxility's engineering credibility), built on the existing Astro +
-Three.js architecture. Dials: variance 8, motion 8, density 3.
+Asked before any code was written, so nothing below is assumed:
 
-The person is Tate Sinclair, software engineer, Scotland, early career,
-building in the open. That last fact is the whole design problem: the site is
-loud about craft and honest that the body of work is still being built.
-Nothing on the page claims more than the content behind it.
-
-## The one bold thing: the structure
-
-The v1 idea survives because it is the only 3D object this site can honestly
-own: a structure grown from this repository's own commit history,
-deterministic (`src/lib/lattice.ts`). In v2 it stops being a diagram beside
-the headline and becomes the centrepiece.
-
-**The growth rule was replaced after looking at it.** v1 added one strut per
-commit on a cubic lattice. Rendered at this repository's size that drew a few
-sprawling arms — a scribble, which is exactly the test v1's own plan set for
-throwing the rule away. The rule is now a tower: each commit adds a floor,
-being a square ring of four beams plus four columns rising from the floor
-below, with the twist and taper of each floor fixed by a hash of its commit.
-Fourteen commits draw a hundred-odd struts that read as an engineered
-structure, and the tower visibly grows as Tate works. The caption states the
-mapping plainly ("14 commits since 2 Sept 2026, one floor each").
-
-- It fills the hero, luminous on a deep ground, and assembles strut by strut
-  on load. That assembly is the single self-playing animation on the page.
-- Scrolling is the interaction. The camera pulls back and rises as the
-  visitor scrolls out of the hero, so the structure recedes into the page
-  rather than being cut off by it. Mouse position tilts it a few degrees.
-  Dragging orbits it. Hovering a strut shows the commit.
-- The text beside it says exactly what it is, in plain words, with the real
-  count and date. The canvas is `aria-hidden`; the caption is the accessible
-  version; the build-time SVG is the no-WebGL and reduced-motion fallback.
-
-Everything else on the page is typography and space.
+1. **DESIGN.md wins over CLAUDE.md §3.** The cream canvas and warm accent
+   that §3 banned are now the system. §3 and the v2 "Direction" note are
+   amended to say so.
+2. **Re-skin, not restructure.** Every section, the gallery, the case-study
+   page and the 404 keep their layout and behaviour. Tokens, type roles,
+   surfaces, radii and colour change everywhere.
+3. **Keep the structure, the dot field and the scroll motion**, recoloured to
+   ink on cream.
+4. **Inter + JetBrains Mono**, self-hosted, latin subsets (DESIGN.md's own
+   substitute for the licensed CursorGothic).
+5. **Status is ink-only.** Shape carries it: a solid mark for shipped, an
+   outlined one for building, a dashed mark and a dashed frame for planned.
+   No status colour, so the accent stays scarce and the timeline pastels stay
+   out of the site entirely (DESIGN.md scopes them to agent timelines, and
+   there are none here).
 
 ## Tokens
 
-Dark ground, one theme. Chosen because the brief pins the direction to
-immersive/creative-studio. The ground is a saturated deep blue, not tinted
-near-black, so it reads as a colour decision rather than a default.
+Names follow DESIGN.md; values are DESIGN.md's; `src/styles/global.css` is
+the only place they are written.
 
-| Token      | Hex       | Role                                                    | Contrast on ground |
-|------------|-----------|---------------------------------------------------------|--------------------|
-| `--ground` | `#0A0F1E` | Page background. Deep blue, clearly not black.          |                    |
-| `--panel`  | `#121A2E` | Raised plane: project panels, contact block.            |                    |
-| `--line`   | `#26304A` | Rules. Never text.                                      |                    |
-| `--bone`   | `#EDE9E3` | Primary text. Warm off-white, not pure white.           | 15.2:1             |
-| `--mist`   | `#98A1B8` | Secondary text.                                         | 7.1:1              |
-| `--pulse`  | `#FFB238` | The one accent: current strut, "building" status, focus rings, links. | 10.4:1; ground text on it 11.8:1 |
+| Token               | Hex       | Role                                                  |
+|---------------------|-----------|-------------------------------------------------------|
+| `--canvas`          | `#f7f7f4` | Page floor. Warm cream, never white.                  |
+| `--canvas-soft`     | `#fafaf7` | Inside frames (the image slot on a card).             |
+| `--surface-card`    | `#ffffff` | Cards, the tooltip, the secondary button.             |
+| `--surface-strong`  | `#e6e5e0` | Badge pills.                                          |
+| `--hairline`        | `#e6e5e0` | Every divider and card outline.                       |
+| `--hairline-soft`   | `#efeee8` | The nav's bottom rule.                                |
+| `--hairline-strong` | `#cfcdc4` | Planned cards' dashed frame, step buttons, link underlines. |
+| `--ink`             | `#26251e` | Display, titles, link text, the CTA.   15.3:1 on canvas |
+| `--body`            | `#5a5852` | Running text, meta, the structure's struts.  6.9:1   |
+| `--muted`           | `#807d72` | Display sizes only (see below).              3.6:1   |
+| `--primary`         | `#f54e00` | The wordmark's node, the newest strut, focus rings.   |
+| `--error`           | `#cf2d56` | Placeholders.                                         |
 
-Amber on deep blue: warm-on-cool, uncommon among developer portfolios (which
-run a cold accent on neutral black), and it carries the meaning the v1 accent
-did: this is the thing in progress.
+**Where this departs from DESIGN.md, and why:**
 
-Corner radius: 0 on panels and frames, full pill on buttons. That is the whole
-rule; nothing else is rounded. No drop shadows; depth comes from the panel
-colour, hairlines and the 3D itself.
+- **No orange button.** DESIGN.md's `button-primary` is white on
+  `#f54e00`, which is 3.5:1; ink on it is 4.3:1. Both are under AA for a
+  14px label, and the brief's quality floor is AA on every pair. The hero
+  CTA is DESIGN.md's `button-download` (ink on canvas, 15:1), which is also
+  the button its own hero band specifies. The orange goes where DESIGN.md
+  allows it as a non-text mark: the wordmark (a 10px node beside the name,
+  because orange *text* at 14px is 3.3:1), the hero accent (the newest strut),
+  and the focus ring (3.3:1 clears the 3:1 non-text floor).
+- **`--muted` is never running text.** At 3.6:1 it fails AA below 24px. It is
+  used for the statement's unlit words (26px) and nothing smaller. Labels and
+  captions that DESIGN.md would set in muted use `--body`.
+- **Placeholders are `--error`.** DESIGN.md has no placeholder component. A
+  fact that is missing is a defect in the page and should read as one; the
+  semantic error colour is the honest choice and it keeps the accent scarce.
 
 ## Typography
 
-Two families, unmistakably distinct in role.
+Inter Variable (latin, 48kB) for everything read; JetBrains Mono 400 (latin,
+21kB) for machine text: commit hashes, dates, years, stack lists, the position
+readout. Together with the 17kB HTML they sit inside the brief's 100kB budget
+for HTML + CSS + fonts.
 
-- **Bricolage Grotesque** (variable, self-hosted, latin subset) for everything
-  read. At display sizes with the optical axis high it has a drafted, slightly
-  eccentric quality; at text sizes it is a clean grotesque. One family covers
-  display through body without looking like a template's Inter.
-- **IBM Plex Mono** (already in the repo) only for machine text: commit hashes
-  and subjects, dates, stack lists, repository URLs. Never for labels.
+Roles are DESIGN.md's, as classes named after its tokens:
 
-Hand-set scale, base 18px, body line-height 1.5, measure 60ch.
+| Class                | Size / weight / line / tracking          | Used for                                   |
+|----------------------|------------------------------------------|--------------------------------------------|
+| `.display-mega`      | 72 → 56 → 32px / 400 / 1.1 / -0.03em     | The hero h1 only                           |
+| `.display-lg`        | 36 / 400 / 1.2 / -0.02em                 | Section heads, case-study h1, 404 h1       |
+| `.display-md`        | 26 / 400 / 1.25 / -0.0125em              | The statement, case-study h2s              |
+| `.display-sm`        | 22 / 400 / 1.3 / -0.005em                | Ledes, card titles, capability items, email |
+| `.title-md`          | 18 / 600 / 1.4                           | Capability group headings                  |
+| `.title-sm`          | 16 / 600 / 1.4                           | Status line                                |
+| body                 | 16 / 400 / 1.5                           | Default                                    |
+| `.body-sm`           | 14 / 400 / 1.5                           | Captions, meta labels, footer              |
+| `.code`              | 13 / 400 / 1.5, JetBrains Mono           | Machine text                               |
+| `.badge`             | 11 / 600 / 0.08em, uppercase, pill       | "Placeholder project"                      |
+| nav, `.button`       | 14 / 500                                 | Nav links, CTA labels                      |
 
-| Role    | Size                          | Weight | Line | Tracking |
-|---------|-------------------------------|--------|------|----------|
-| display | clamp(3.5rem, 11vw, 10rem)    | 500    | 0.92 | -0.035em |
-| title   | clamp(2.25rem, 5.5vw, 4.5rem) | 500    | 0.98 | -0.025em |
-| h2      | clamp(1.75rem, 3vw, 2.5rem)   | 500    | 1.1  | -0.015em |
-| lede    | clamp(1.25rem, 1.8vw, 1.5rem) | 400    | 1.35 | -0.005em |
-| body    | 1.125rem                      | 400    | 1.5  | 0        |
-| small   | 0.9375rem                     | 400    | 1.45 | 0        |
-| mono    | 0.875rem                      | 400    | 1.5  | 0        |
-
-No tracked-out caps. No eyebrows. No emphasis inside headings.
+Display stays at 400. The only weight above it is 600 on titles, as DESIGN.md
+has it. Tracked uppercase appears in one place, the badge pill, which is the
+component DESIGN.md defines it for; there are still no section eyebrows.
 
 ## Layout
 
-Full-bleed, 24px page margin (40px at 1024+), 12-column grid at 1024+. Left
-aligned everywhere; nothing is centred. Sections are tall and sparse.
+Unchanged in structure (decision 2). What changed: the container caps at
+1200px; the section rhythm is 80px; spacing snaps to the 4px scale; cards
+are 12px radius with a 1px hairline and no shadow; buttons are 8px; the
+image slot inside a card is 8px; badges are pills. Depth is hairline-only:
+white cards on the cream floor, planned cards as dashed outlines with the
+floor showing through.
 
-```
-HERO (100dvh)
-┌──────────────────────────────────────────────────────────────────┐
-│ Tate Sinclair                            Work  About  Contact    │ nav 64px
-│                                                                  │
-│                                  ╱╲    ╱╲                        │
-│                                 ╱  ╲__╱  ╲___    (structure,     │
-│                                ╱╲  ╱╲ ╱╲ ╱  ╲     luminous,      │
-│                               ╱  ╲╱  ╳  ╲╱    ╲   cols 6-12)     │
-│  Tate                        ╱___╱╲_╱ ╲__╲_____╲                 │
-│  Sinclair                        ╲╱     ╲╱                       │
-│  Software engineer in Scotland,                                  │
-│  building in the open.       This site's own history:            │
-│  [ See what I'm building ]   12 commits since 2 Sep 2026         │
-└──────────────────────────────────────────────────────────────────┘
+## The structure, the field, the motion
 
-STATEMENT: one long line of display text, words brightening as you scroll.
+All kept (decision 3) and recoloured:
 
-WORK: one full-height panel per project; each pins as the next slides over
-it (sticky stack).
-┌──────────────────────────────────────────────────────────────────┐
-│ Building now                                                     │
-│                                                                  │
-│ Munro log                          ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐    │
-│ A logbook for Munro climbs...        [ADD: PROJECT SCREENSHOT]   │
-│ TypeScript  SvelteKit  SQLite      └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘    │
-│ Read the case study                        Placeholder project   │
-└──────────────────────────────────────────────────────────────────┘
+- Struts are `--body`, nodes `--ink`, the newest strut `--primary`. The
+  additive glow pass is gone: additive blending lightens, which on a cream
+  ground is invisible, and DESIGN.md has no glow anyway. That also removes
+  one instanced mesh and one draw call.
+- The SVG fallback lost its `drop-shadow` filter for the same reason.
+- The dot field draws in ink. Its opacity is capped at 0.15 so body copy read
+  against a dot at full bloom stays at 4.9:1.
+- The statement's unlit words are `--muted` (3.6:1 at 26px), which also
+  clears the one contrast failure Lighthouse had been reporting against the
+  v2 site.
 
-CAPABILITIES: "Working in" and "Learning" as two large lists, placeholders
-until Tate supplies them.
+## Efficiency changes made alongside
 
-ABOUT: heading left, [ADD: SHORT BIO] right, beside the three real facts.
+Found in the audit Tate asked for, and applied because none of them change
+behaviour:
 
-CONTACT: "Say hello" at display size; email and links as placeholders.
-```
+- **Scroll motion loads after the page has.** Lenis + GSAP + ScrollTrigger
+  (about 50kB gzipped) were in the eager home-page bundle. Nothing above the
+  fold needs them (the hero intro is CSS), so they now load on `load` + idle,
+  the way the scene already did. The gallery's controls stay eager: they are
+  small and answer input.
+- **`mix-blend-mode: difference` is off the nav.** It forced a compositing
+  layer over the whole viewport on every frame; a canvas fill with a hairline
+  is what DESIGN.md specifies and costs nothing.
+- **`filter: drop-shadow` is off the SVG fallback** (a filter over a few
+  hundred paths, repainted on every scroll).
+- **The glow pass is out of the scene** (see above).
+- **`@astrojs/check` is installed**, so `npx astro check` works as CLAUDE.md
+  says it does. It found two real type errors in the idle-callback guards,
+  now fixed.
+- **`site.linkedin` had no scheme**, so it rendered as a relative link;
+  fixed. **`site.repo` was removed** but two components still read it; those
+  links now render only when it has a value.
 
-Mobile (< 1024): one column, text before structure, the sticky stack becomes
-a plain stack, everything left aligned at the 24px margin.
+## Genericness review
 
-## Placeholders
+Checked against CLAUDE.md §3's tell list, which DESIGN.md now overrides
+where they conflict, and the frontend-design skill's list.
 
-Every fact not present in the repository is rendered by one component,
-`Placeholder.astro`: a dashed amber frame with `[ADD: LABEL]` in mono. It
-cannot be mistaken for content. The four seed projects carry
-`placeholder: true` in frontmatter and show a visible "Placeholder project"
-mark on the panel and the case study. Replacing content means editing one
-data file (`src/lib/site.ts`, `src/lib/skills.ts`) or one markdown file.
-
-## Motion
-
-Stack: **Lenis** for smooth scroll, **GSAP + ScrollTrigger** for everything
-scroll-driven, ticked together the way Lenis documents (`lenis.on('scroll',
-ScrollTrigger.update)`, `gsap.ticker` driving `lenis.raf`). Three.js for the
-one scene. Vanta.js was evaluated and not bundled: it targets Three r134,
-needs the full `THREE` namespace (about 150kB gzipped on top of the scene)
-and a second WebGL context. Its idea, an ambient pointer-reactive field, is
-built natively inside the existing scene instead.
-
-- Load: the headline lines rise out of a mask (CSS keyframes, so it starts at
-  first paint and never waits for a module), lede and button settle after,
-  while the structure assembles strut by strut. The one self-playing sequence.
-- The field: points on a disc at ground level under the structure, joined
-  where near, drifting slowly. It runs only while the hero is on screen and
-  the tab is visible, tilts with the pointer along with the structure, and
-  fades out over the first 60% of the hero's scroll so the page never pays
-  for it once it is gone.
-- Scroll, each carrying meaning: the camera pulls back and rises (the object
-  recedes); statement words brighten in reading order (reading pace); each
-  project panel scales to 0.94 and dims as the next covers it (depth in the
-  stack); project visuals uncover once and drift a few percent (parallax);
-  the three display headings rise out of a mask once as they arrive.
-- The nav hides on scroll down and returns on scroll up.
-- Page transitions: cross-document view transitions, a 320ms fade between
-  home and case studies, CSS only.
-- Responses to the user: nav active state, link underlines, button press
-  `scale(0.97)` at 140ms ease-out, copy-email label change, orbit, hover tip.
-- Easing: `expo.out` / `cubic-bezier(0.23, 1, 0.32, 1)` for entrances; UI
-  under 300ms; scrubbed motion is linear to the scrollbar.
-- Reduced motion: no smooth scroll, no field, structure renders assembled,
-  words all bright, headings in place, panels stack plainly, no transitions.
-  Only `transform`, `opacity` and `clip-path` are ever animated.
-
-## Principles
-
-1. Honest first. Status is structural, placeholders are loud, no invented
-   facts. The site can be loud about craft because it is quiet about claims.
-2. One object. The structure is the only 3D and the only self-playing motion.
-3. Type does the work. Big, left-aligned, one family for reading.
-4. Scroll is the interface. Motion answers the scrollbar or the pointer;
-   nothing plays on its own after load.
-5. Text before script. The page is complete with JavaScript off.
-
-## Genericness review, and what changed
-
-Checked against the frontend-design skill's tell list, the Taste skill's
-pre-flight and CLAUDE.md §3.
-
-- **Ground colour.** First draft was `#0E0E0E`, the neutral near-black the
-  tell list names. Replaced with a saturated deep blue so the darkness is a
-  colour and the amber has something to be warm against.
-- **Accent.** First draft was electric green `#8EF0D2`, the "acid green on
-  black" default. Replaced with amber.
-- **Display face.** First draft reached for Space Grotesk, the creative-agency
-  default. Replaced with Bricolage Grotesque, whose optical-size axis makes
-  display and text genuinely different in one family.
-- **Section eyebrows.** First draft had `WORK`, `ABOUT`, `CONTACT` tracked
-  out above each heading. Removed. The headings are the headings.
-- **Project numbering.** First draft numbered panels `01 / 02 / 03 / 04`.
-  Projects are not a sequence. Removed; the status word does the ordering.
-- **Scroll cue.** First draft had "Scroll" with an arrow at the hero's foot.
-  Removed.
-- **Middle dots.** First draft joined stack as `TypeScript · SvelteKit`.
-  Now a spaced mono list.
-- **Fade-up on every section.** First draft revealed each section on entry.
-  Cut to three scroll-driven behaviours that each carry meaning: the camera
-  (the object recedes), the statement (reading pace), the stack (projects as
-  a sequence of surfaces). Nothing else animates on scroll.
-- **Photography.** The Taste skill wants real images. There are none in the
-  repo and the brief forbids inventing them. The image slot is an explicit
-  `[ADD: PROJECT SCREENSHOT]` frame, styled as a deliberate part of the
-  composition rather than a broken image.
-- **Budget.** v1 held JS-before-3D under 30kB. v2 ships Lenis + GSAP +
-  ScrollTrigger (about 50kB gzipped together), loaded after the HTML. Accepted
-  for this direction; the scene (136kB) is still lazy and on-demand, and the
-  page is readable before any of it loads.
+- The cream ground with a warm accent is the look §3 banned. That is the
+  decision Tate made; the system is DESIGN.md's, not a template's, and the
+  page keeps the things a template would not have: the commit structure, the
+  halftone field, the gallery, the placeholders, the honest status.
+- Inter is the substitute DESIGN.md names. It is used at 400 with negative
+  tracking at display sizes, which is the editorial voice the system asks
+  for, not the Geist-on-black default §3 warned about.
+- No eyebrows, no `→`, no middle dots, no numbered markers (the gallery's
+  `01 / 04` is a position in a sequence you move through, which is what a
+  counter is for), no per-section fade-ups, no gradient washes.
+- No orange button, because it fails AA; see Tokens.

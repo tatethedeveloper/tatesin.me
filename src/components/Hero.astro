@@ -8,14 +8,14 @@ import DotBloom from './DotBloom.astro';
   <DotBloom gap={30} speed={1} />
 
   <div class="wrap frame">
-    <h1 class="display" id="hero-title">
+    <h1 class="display-mega" id="hero-title">
       <span class="mask"><span class="line">Tate</span></span>
       <span class="mask"><span class="line">Sinclair</span></span>
     </h1>
 
-    <p class="lede intro role">{site.role},<br />{site.location}</p>
+    <p class="body-md intro role">{site.role},<br />{site.location}</p>
 
-    <p class="lede intro pitch">Early career. Building in the open, and showing the work while it is still work.</p>
+    <p class="display-sm intro pitch">Early career. Building in the open, and showing the work while it is still work.</p>
 
     <a class="button intro cta" href="/#work">See what I'm building</a>
 
@@ -43,13 +43,13 @@ import DotBloom from './DotBloom.astro';
     gap: 28px;
     padding-bottom: clamp(32px, 5vh, 56px);
   }
-  .display {
+  .display-mega {
     position: relative;
     z-index: 1;
   }
   .role,
   .pitch {
-    color: var(--mist);
+    color: var(--body);
   }
   .cta {
     justify-self: start;
@@ -78,7 +78,7 @@ import DotBloom from './DotBloom.astro';
       grid-row: 1;
       align-self: start;
     }
-    .display {
+    .display-mega {
       grid-column: 1 / span 6;
       grid-row: 2;
       align-self: center;
@@ -87,7 +87,7 @@ import DotBloom from './DotBloom.astro';
       grid-column: 1 / span 4;
       grid-row: 3;
       align-self: end;
-      max-width: 34ch;
+      max-width: 30ch;
     }
     .cta {
       grid-column: 5 / span 2;
@@ -122,7 +122,7 @@ import DotBloom from './DotBloom.astro';
     .role {
       order: 1;
     }
-    .display {
+    .display-mega {
       order: 2;
     }
     .pitch {

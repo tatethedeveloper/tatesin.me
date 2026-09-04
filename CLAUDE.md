@@ -9,23 +9,31 @@ scroll) and `gsap` with ScrollTrigger (scroll-driven animation). Deploys to GitH
 `.github/workflows/deploy.yml` on push to `main`; the custom domain is
 `public/CNAME`.
 
-**Direction (v2, Sep 2026):** Tate chose a full creative-studio redesign
-(Lusion's ambition, Auxility's engineering credibility) over the v1 blueprint
-direction. That supersedes the light-theme and low-motion constraints in §3
-and §5 below; everything else in the brief (honesty, no invented facts,
-placeholders, quality floor, budgets) still applies. The plan is
-`docs/design-plan.md`; v1 is kept as `docs/design-plan-v1.md`.
+**Direction (v3, 4 Sep 2026):** Tate supplied `DESIGN.md` (root) and named it
+the source of truth for the visual system: warm cream canvas, warm ink, one
+orange accent used scarcely, Inter + JetBrains Mono, display at weight 400,
+hairline-only depth, 8/12px radii, 80px rhythm. **DESIGN.md overrides §3's
+hard constraints where they conflict** (the cream-ground ban, the Inter
+caution). Everything else in the brief (honesty, no invented facts,
+placeholders, quality floor, budgets, motion rules) still applies. The plan,
+with each departure from DESIGN.md and its reason, is `docs/design-plan.md`;
+v2 (dark creative-studio) and v1 (blueprint) are kept alongside it.
+
+Tate's standing instruction for design work: **ask, do not assume.** The v3
+decisions (source of truth, scope, motion, typeface, status colour) were
+each put to Tate before code was written; do the same for anything of that
+size.
 
 ### Commands
 
 - `npm run dev` / `npm run build` / `npm run preview` (preview serves `dist/` on :4321)
-- `npx astro check` for types across `.astro` files
+- `npx astro check` for types across `.astro` files (`@astrojs/check` is a dev dependency)
 - Playwright CLI is configured in `.playwright/cli.config.json` (Chromium, isolated).
   `playwright-cli open http://localhost:4321/`, then `resize`, `screenshot`, `press Tab`, `eval`.
   Reduced motion: open a session with a config whose `contextOptions` has `reducedMotion: "reduce"`.
 - Lighthouse: `CHROME_PATH=<playwright chrome-headless-shell> npx lighthouse http://localhost:4321/ --form-factor=mobile --screenEmulation.mobile --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new"`
 - OG image: build, preview, then screenshot `/og/` at 1200x630 into `public/og.png`.
-  **TODO(tate): regenerate it; the committed `og.png` is still the v1 light image.**
+  Regenerated for v3 on 4 Sep 2026.
 
 ### How it fits together
 
@@ -59,7 +67,12 @@ placeholders, quality floor, budgets) still applies. The plan is
 - Facts that are not in the repo are `null` in `src/lib/site.ts`, empty in
   `src/lib/skills.ts`, or `placeholder` entries in `src/lib/about.ts`, and render through
   `src/components/Placeholder.astro` as `[ADD: ...]`. Fill the value in to replace it.
-- Tokens and type roles live in `src/styles/global.css`; components use them, never raw hex.
+- Tokens and type roles live in `src/styles/global.css`, named as DESIGN.md names them
+  (`--canvas`, `--ink`, `--body`, `--hairline`, `.display-lg`, `.body-sm`, `.code`…);
+  components use them, never raw hex. The scene (`structure-scene.ts`) and the dot field
+  hold hex copies of four of them because a WebGL/canvas context cannot read CSS.
+  `--muted` is never used below 24px (3.6:1 on the canvas) and there is no orange
+  button (white on orange is 3.5:1); the plan explains both.
 - Everything Tate still has to supply is marked `TODO(tate)` in source (`grep -rn "TODO(tate)" src`).
 
 # Portfolio site — Tate Sinclair
@@ -117,7 +130,8 @@ The subject matter is not "software engineering" in the abstract. It's **a perso
 These are the current defaults of AI-generated design. They will read as templated:
 
 - Near-black background (`#0B0B0B`, `#111`) with a single acid-green or vermilion accent. This is *the* engineer-portfolio default. Avoid it.
-- Warm cream background (`#F4F1EA`) with a high-contrast serif and a terracotta accent.
+- ~~Warm cream background (`#F4F1EA`) with a high-contrast serif and a terracotta accent.~~
+  *Overridden by DESIGN.md (v3): the canvas is cream and the accent is orange, by decision.*
 - Content chopped into identical rounded cards, same border-radius on everything, same soft grey shadow under each.
 - Tracked-out ALL-CAPS eyebrow labels above every section heading.
 - A `→` appended to every link and button label.

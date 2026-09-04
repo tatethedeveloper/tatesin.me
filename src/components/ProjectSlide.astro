@@ -1,8 +1,10 @@
 ---
 /**
  * One project in the work gallery. The whole slide is the link to the case
- * study: image, status, title, one sentence. Status still changes the slide
- * itself (the frame and the mark), not just a word.
+ * study: image, status, title, one sentence. Status changes the card itself,
+ * not just a word — and it does so in shape, not colour: a solid mark for
+ * shipped, an outlined one for building, a dashed one (and a dashed frame)
+ * for planned.
  */
 import type { Project } from '../lib/projects';
 import { statusLabel } from '../lib/projects';
@@ -30,24 +32,24 @@ const href = `/projects/${project.id}/`;
       }
     </span>
 
-    <span class="status">
+    <span class="status title-sm">
       <span class="mark" aria-hidden="true"></span>
       {statusLabel[status]}{status === 'building' ? ' now' : ''}
-      {placeholder && <span class="ph-mark mono">Placeholder project</span>}
+      {placeholder && <span class="badge">Placeholder project</span>}
     </span>
 
-    <span class="h2 name">{title}</span>
-    <span class="summary" id={`slide-sum-${index}`}>{summary}</span>
+    <span class="display-sm name">{title}</span>
+    <span class="summary body-sm body" id={`slide-sum-${index}`}>{summary}</span>
 
-    <span class="mono meta">
+    <span class="code meta body">
       <span>{year}</span>
       <span>{role}</span>
       {stack.slice(0, 3).map((s) => <span>{s}</span>)}
     </span>
 
-    <span class="go mono">
+    <span class="go body-sm">
       <span class="go-label">Open the case study</span>
-      <span class="count">{String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}</span>
+      <span class="count code body">{String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}</span>
     </span>
   </a>
 </li>
@@ -65,26 +67,29 @@ const href = `/projects/${project.id}/`;
     grid-template-rows: auto auto auto auto auto 1fr;
     gap: 14px;
     height: 100%;
-    padding: 16px 16px 20px;
-    border: 1px solid var(--line);
-    background: var(--panel);
+    padding: var(--space-base) var(--space-base) var(--space-md);
+    border: 1px solid var(--hairline);
+    border-radius: var(--rounded-lg);
+    background: var(--surface-card);
     text-decoration: none;
     transition:
       border-color var(--dur) var(--ease-out),
-      background-color var(--dur) var(--ease-out),
       transform 260ms var(--ease-out);
   }
+  /* Planned: an intention, not a surface. Dashed frame, canvas showing through. */
   .planned .face {
     background: transparent;
     border-style: dashed;
+    border-color: var(--hairline-strong);
   }
   @media (hover: hover) and (pointer: fine) {
     .face:hover {
-      border-color: var(--pulse);
+      border-color: var(--ink);
       transform: translateY(-4px);
     }
     .face:hover .go-label {
-      color: var(--pulse);
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
     }
     .face:hover .visual :global(img) {
       transform: scale(1.03);
@@ -94,7 +99,8 @@ const href = `/projects/${project.id}/`;
     display: block;
     overflow: hidden;
     aspect-ratio: 16 / 10;
-    background: color-mix(in srgb, var(--ground) 60%, transparent);
+    border-radius: var(--rounded-md);
+    background: var(--canvas-soft);
   }
   .visual :global(img) {
     width: 100%;
@@ -117,71 +123,50 @@ const href = `/projects/${project.id}/`;
   .status {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
-    font-size: var(--text-small);
-    font-weight: 500;
+    color: var(--ink);
   }
   .mark {
     width: 10px;
     height: 10px;
     flex: none;
-    border: 1px solid var(--bone);
-  }
-  .building .mark {
-    background: var(--pulse);
-    border-color: var(--pulse);
+    border: 1.5px solid var(--ink);
   }
   .shipped .mark {
-    background: var(--bone);
+    background: var(--ink);
   }
   .planned .mark {
     border-style: dashed;
-    border-color: var(--mist);
   }
   .planned .status {
-    color: var(--mist);
-  }
-  .building .status {
-    color: var(--pulse);
-  }
-  .ph-mark {
-    padding: 2px 8px;
-    border: 1px dashed var(--pulse);
-    color: var(--pulse);
-    font-weight: 400;
+    color: var(--body);
   }
 
   .name {
     display: block;
+    color: var(--ink);
   }
   .planned .name {
-    color: var(--mist);
+    color: var(--body);
   }
   .summary {
     display: block;
     max-width: 42ch;
-    color: var(--mist);
-    font-size: var(--text-small);
   }
   .meta {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 16px;
-    color: var(--mist);
   }
   .go {
     display: flex;
     align-items: end;
     justify-content: space-between;
-    gap: 16px;
-    padding-top: 4px;
-    border-top: 1px solid var(--line);
-    color: var(--bone);
-  }
-  .go-label {
-    transition: color var(--dur) var(--ease-out);
-  }
-  .count {
-    color: var(--mist);
+    gap: var(--space-base);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--hairline);
+    color: var(--ink);
+    font-weight: 500;
   }
 </style>
