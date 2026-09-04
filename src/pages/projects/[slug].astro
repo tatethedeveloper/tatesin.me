@@ -14,7 +14,7 @@ const { title, summary, status, role, stack, year, repo, demo, placeholder, cove
 const { Content } = await render(project);
 ---
 
-<Base title={title} description={summary} path={`/projects/${project.id}/`}>
+<Base title={title} description={summary || undefined} path={`/projects/${project.id}/`}>
   <article class:list={['study', status]}>
     <header class="wrap head">
       <p class="body-sm"><a href="/#work">All work</a></p>
@@ -24,7 +24,7 @@ const { Content } = await render(project);
         {placeholder && <span class="badge">Placeholder project</span>}
       </p>
       <h1 class="display-lg">{title}</h1>
-      <p class="display-sm measure body">{summary}</p>
+      {summary && <p class="display-sm measure body">{summary}</p>}
     </header>
 
     <div class="wrap visual" aria-hidden={cover ? undefined : 'true'}>

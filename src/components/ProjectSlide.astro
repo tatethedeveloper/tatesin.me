@@ -21,7 +21,11 @@ const href = `/projects/${project.id}/`;
 ---
 
 <li class:list={['slide', status]} data-slide data-index={index} id={`slide-${index}`}>
-  <a class="face" href={href} aria-describedby={`slide-sum-${index}`}>
+  <a
+    class:list={['face', { 'no-summary': !summary }]}
+    href={href}
+    aria-describedby={summary ? `slide-sum-${index}` : undefined}
+  >
     <span class="visual" data-reveal>
       {
         cover ? (
@@ -39,7 +43,7 @@ const href = `/projects/${project.id}/`;
     </span>
 
     <span class="display-sm name">{title}</span>
-    <span class="summary body-sm body" id={`slide-sum-${index}`}>{summary}</span>
+    {summary && <span class="summary body-sm body" id={`slide-sum-${index}`}>{summary}</span>}
 
     <span class="code meta body">
       <span>{year}</span>
@@ -64,6 +68,8 @@ const href = `/projects/${project.id}/`;
   }
   .face {
     display: grid;
+    /* The last track is the one that stretches, so "Open the project" stays on
+       the bottom edge whatever the slide holds above it. */
     grid-template-rows: auto auto auto auto auto 1fr;
     gap: 14px;
     height: 100%;
@@ -75,6 +81,10 @@ const href = `/projects/${project.id}/`;
     transition:
       border-color var(--dur) var(--ease-out),
       transform 260ms var(--ease-out);
+  }
+  /* A project with no summary yet is one row shorter. */
+  .face.no-summary {
+    grid-template-rows: auto auto auto auto 1fr;
   }
   /* Planned: an intention, not a surface. Dashed frame, canvas showing through. */
   .planned .face {
