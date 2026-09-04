@@ -99,6 +99,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     mesh.setMatrixAt(i, m);
   };
 
+  // Pointer tilt targets. Read by the scheduler below; set by the pointer.
+  let targetTx = 0;
+  let targetTy = 0;
+
   const strutGeo = new BoxGeometry(1, 1, 1);
   const strutMat = new MeshBasicMaterial();
   const strutMesh = new InstancedMesh(strutGeo, strutMat, n);
@@ -220,7 +224,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   let dragYaw = 0;
 
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // 1.5, not the display's 2. With MSAA already on, the difference on a
+  // wireframe this thin is not visible at arm's length, and it is 44% fewer
+  // pixels to shade and composite on every frame of the hero.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.setClearColor(0x000000, 0);
   const canvas = renderer.domElement;
   stage.appendChild(canvas);
@@ -237,33 +244,76 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     requestRender();
   };
 
-  // Render on demand.
+  // One scheduler, one render per frame.
+  //
+  // The field's drift, the pointer tilt and every on-demand redraw (drag,
+  // hover, scroll) used to own a requestAnimationFrame loop each, and each
+  // called renderer.render itself. Moving the pointer over the hero therefore
+  // drew the whole structure twice in the same frame — the tilt's render and
+  // the field's — which is what made the hero drop to 30fps under the hand.
+  // Now they all mark the scene dirty and this loop draws it once.
   let raf = 0;
   let visible = true;
   let assembling = true;
-  const render = () => {
+  let dirty = false;
+  let fieldLast = 0;
+  /** Set while the pointer tilt is still easing toward its target. */
+  let tilting = false;
+  /** Last pointer position awaiting a hover test, in client coordinates. */
+  let hoverX = 0;
+  let hoverY = 0;
+  let hoverPending = false;
+
+  const awake = () => visible && !document.hidden;
+
+  const tick = (t: number) => {
     raf = 0;
-    if (!visible || document.hidden) return;
-    renderer.render(scene, camera);
-  };
-  const requestRender = () => {
-    if (!raf) raf = requestAnimationFrame(render);
+    if (!awake()) return;
+
+    // At most one hover test per frame. A pointer can report faster than the
+    // display refreshes, and each test is a ray against every strut.
+    if (hoverPending) {
+      hoverPending = false;
+      hover(hoverX, hoverY);
+    }
+
+    if (tilting) {
+      const dx = targetTx - tilt.rotation.x;
+      const dy = targetTy - tilt.rotation.y;
+      tilt.rotation.x += dx * 0.08;
+      tilt.rotation.y += dy * 0.08;
+      tilting = Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4;
+      dirty = true;
+    }
+
+    // The field drifts at 30fps. The points rise and fall on a six-second
+    // sine, so half the frames carry all of the motion, and each frame
+    // skipped is a whole scene render the hero does not have to pay for.
+    if (field.visible && t - fieldLast > 32) {
+      fieldLast = t;
+      driftField(t);
+      dirty = true;
+    }
+
+    if (dirty && !assembling) {
+      dirty = false;
+      renderer.render(scene, camera);
+    }
+
+    // Keep going while something is still moving; otherwise sleep until
+    // the next input marks the scene dirty.
+    if (field.visible || tilting || dirty || hoverPending) schedule();
   };
 
-  // The field's loop. Runs only while the stage is on screen, the tab is
-  // visible and the field has not faded out. Draws the whole scene, so the
-  // on-demand path is a no-op while this is running.
-  let fieldRaf = 0;
-  const fieldTick = (t: number) => {
-    fieldRaf = 0;
-    if (!visible || document.hidden || !field.visible) return;
-    driftField(t);
-    if (!assembling) renderer.render(scene, camera);
-    fieldRaf = requestAnimationFrame(fieldTick);
+  const schedule = () => {
+    if (!raf && awake()) raf = requestAnimationFrame(tick);
   };
-  const wakeField = () => {
-    if (!fieldRaf && visible && !document.hidden && field.visible) fieldRaf = requestAnimationFrame(fieldTick);
+  const requestRender = () => {
+    dirty = true;
+    schedule();
   };
+  /** Kept as a name because the scroll and visibility paths read better for it. */
+  const wakeField = schedule;
 
   // Assembly: each strut grows from its start node in commit order, staggered
   // across ASSEMBLE_MS with an ease-out. Bounds are computed with every strut
@@ -289,32 +339,21 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     if (!done) requestAnimationFrame(assemble);
     else {
       assembling = false;
-      wakeField();
+      requestRender();
     }
   };
 
-  // Pointer tilt: a few degrees toward the cursor, eased. Runs a short loop
-  // only until it settles. Fine pointers only; touch scrolls instead.
+  // Pointer tilt: a few degrees toward the cursor, eased by the scheduler.
+  // Fine pointers only; touch scrolls instead.
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  let targetTx = 0;
-  let targetTy = 0;
-  let tiltRaf = 0;
-  const settle = () => {
-    tiltRaf = 0;
-    const dx = targetTx - tilt.rotation.x;
-    const dy = targetTy - tilt.rotation.y;
-    tilt.rotation.x += dx * 0.08;
-    tilt.rotation.y += dy * 0.08;
-    if (!assembling) renderer.render(scene, camera);
-    if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) tiltRaf = requestAnimationFrame(settle);
-  };
   const onWindowMove = (e: PointerEvent) => {
     if (dragging) return;
     const nx = (e.clientX / window.innerWidth) * 2 - 1;
     const ny = (e.clientY / window.innerHeight) * 2 - 1;
     targetTy = nx * 0.12;
     targetTx = ny * 0.08;
-    if (!tiltRaf) tiltRaf = requestAnimationFrame(settle);
+    tilting = true;
+    schedule();
   };
   if (fine) window.addEventListener('pointermove', onWindowMove, { passive: true });
 
@@ -340,7 +379,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
       requestRender();
       return;
     }
-    hover(e);
+    hoverX = e.clientX;
+    hoverY = e.clientY;
+    hoverPending = true;
+    schedule();
   };
   const onUp = (e: PointerEvent) => {
     dragging = false;
@@ -353,10 +395,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   const pointer = new Vector2();
   let hovered = -1;
   const restore = (i: number) => paint(i, i === n - 1 ? PULSE : STRUT_COLOR);
-  const hover = (e: PointerEvent) => {
+  const hover = (clientX: number, clientY: number) => {
     if (!fine) return;
     const rect = canvas.getBoundingClientRect();
-    pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+    pointer.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObject(strutMesh, false)[0];
     const idx = hit && hit.instanceId !== undefined ? hit.instanceId : -1;
@@ -376,8 +418,8 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
         when.className = 'when';
         when.textContent = `${commits[idx].h}  ${commits[idx].d}`;
         tip.append(subject, when);
-        tip.style.left = `${e.clientX - rect.left}px`;
-        tip.style.top = `${e.clientY - rect.top}px`;
+        tip.style.left = `${clientX - rect.left}px`;
+        tip.style.top = `${clientY - rect.top}px`;
         tip.hidden = false;
       } else {
         tip.hidden = true;
@@ -442,7 +484,7 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     'pagehide',
     () => {
       trigger.kill();
-      if (fieldRaf) cancelAnimationFrame(fieldRaf);
+      if (raf) cancelAnimationFrame(raf);
       io.disconnect();
       ro.disconnect();
       if (fine) window.removeEventListener('pointermove', onWindowMove);

@@ -12,6 +12,17 @@
  * Rules it keeps to (see CLAUDE.md §5): it stops when off-screen and when the
  * tab is hidden, it caps the pixel ratio, and under prefers-reduced-motion it
  * paints one frame and never animates.
+ *
+ * It is drawn at 1 device pixel per CSS pixel, not the display's ratio. A
+ * full-viewport canvas at DPR 2 is five megapixels to clear and re-raster
+ * every frame, and on a Retina display that alone cost about half the hero's
+ * frame budget. The dots are soft, round and never sit against an edge, so
+ * there is nothing in this drawing that a second sample per pixel improves.
+ *
+ * The edge fade is computed here rather than by a CSS mask over the element.
+ * A mask on an animating full-screen canvas forces a separate compositing
+ * layer to be re-blended every frame; folding the same falloff into each
+ * dot's alpha costs one multiply per dot and none per pixel.
  */
 
 interface Options {
@@ -59,22 +70,42 @@ export function dotBloom(host: HTMLElement, { gap = 26, speed = 1 }: Options = {
   let raf = 0;
   let visible = false;
   let last = 0;
+  /** Dots grouped by opacity step: x, y, r triples, filled once per step. */
+  const STEPS = 24;
+  let bucketXYR: Float32Array[] = [];
+  let bucketN = new Uint16Array(STEPS);
+  /** Reciprocals of the fade ellipse's radii, in CSS pixels. */
+  let fadeRx = 1;
+  let fadeRy = 1;
+  let fadeCx = 0;
+  let fadeCy = 0;
 
   const measure = (): void => {
     const rect = host.getBoundingClientRect();
     w = Math.max(1, Math.round(rect.width));
     h = Math.max(1, Math.round(rect.height));
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
+    canvas.width = w;
+    canvas.height = h;
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     // A whole number of cells, centred, so the grid never crops unevenly.
     cols = Math.ceil(w / gap) + 1;
     rows = Math.ceil(h / gap) + 1;
     originX = (w - (cols - 1) * gap) / 2;
     originY = (h - (rows - 1) * gap) / 2;
+    // The ellipse the CSS mask described: radial-gradient(125% 105% at
+    // 50% 45%, #000 30%, transparent 100%). The percentages are radii, so the
+    // ellipse reaches well past the element and only the corners fade much.
+    fadeCx = w * 0.5;
+    fadeCy = h * 0.45;
+    fadeRx = 1 / (w * 1.25);
+    fadeRy = 1 / (h * 1.05);
+    // Allocated once per resize, not once per frame: at 30fps a fresh set of
+    // arrays every frame is garbage the collector has to chase during load.
+    const cap = cols * rows * 3;
+    bucketXYR = [];
+    for (let k = 0; k < STEPS; k++) bucketXYR.push(new Float32Array(cap));
     colour = getComputedStyle(host).color || colour;
   };
 
@@ -89,8 +120,14 @@ export function dotBloom(host: HTMLElement, { gap = 26, speed = 1 }: Options = {
     const s1 = 0.0034;
     const s2 = s1 * 2.4;
 
+    // Dots are collected into a few opacity steps and each step is filled as
+    // one path. The eye cannot separate 24 levels of a 4%-to-15% ramp, and it
+    // turns roughly 1500 fill calls a frame into at most 24.
+    bucketN.fill(0);
+
     for (let j = 0; j < rows; j++) {
       const y = originY + j * gap;
+      const dy = (y - fadeCy) * fadeRy;
       for (let i = 0; i < cols; i++) {
         const x = originX + i * gap;
         // The rates are in noise units: at s1 one unit is ~300px, so the
@@ -105,23 +142,54 @@ export function dotBloom(host: HTMLElement, { gap = 26, speed = 1 }: Options = {
         const e = Math.min(1, Math.max(0, (n - 0.42) / 0.44));
         const bloom = e * e * (3 - 2 * e);
 
+        // The edge fade, as the CSS mask had it: solid to 30% of the way out,
+        // then smoothly to nothing at the ellipse's edge.
+        const dx = (x - fadeCx) * fadeRx;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d >= 1) continue;
+        // Linear from the 30% stop outwards, as a CSS gradient interpolates.
+        const fade = d <= 0.3 ? 1 : 1 - (d - 0.3) / 0.7;
+
         // Capped deliberately. The dots are ink on the canvas, so the worst
         // case is body copy read against a dot at full bloom: at 0.15 that
         // pair is 4.9:1, and by a fifth it has dropped under AA. Size carries
         // the bloom instead — which is what a halftone does anyway.
-        ctx.globalAlpha = 0.04 + bloom * 0.11;
-        const r = 0.6 + bloom * (gap * 0.22);
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
+        const alpha = (0.04 + bloom * 0.11) * fade;
+        const step = Math.min(STEPS - 1, Math.round((alpha / 0.15) * (STEPS - 1)));
+        if (step === 0) continue;
+        const arr = bucketXYR[step];
+        let at = bucketN[step];
+        arr[at] = x;
+        arr[at + 1] = y;
+        arr[at + 2] = 0.6 + bloom * (gap * 0.22);
+        bucketN[step] = at + 3;
       }
+    }
+
+    const TAU = Math.PI * 2;
+    for (let k = 1; k < STEPS; k++) {
+      const count = bucketN[k];
+      if (!count) continue;
+      const arr = bucketXYR[k];
+      ctx.globalAlpha = (k / (STEPS - 1)) * 0.15;
+      ctx.beginPath();
+      for (let i = 0; i < count; i += 3) {
+        const x = arr[i];
+        const y = arr[i + 1];
+        const r = arr[i + 2];
+        ctx.moveTo(x + r, y);
+        ctx.arc(x, y, r, 0, TAU);
+      }
+      ctx.fill();
     }
     ctx.globalAlpha = 1;
   };
 
   const frame = (time: number): void => {
-    // ~36fps is plenty for weather this slow, and it halves the cost.
-    if (time - last > 27) {
+    // 30fps. The weather moves at 65px a second, so a frame every 33ms is
+    // four pixels of travel — smooth at this speed, and it leaves the rest of
+    // the budget to the scene and the scroll.
+    if (time - last > 32) {
       last = time;
       draw(time);
     }

@@ -24,7 +24,10 @@ export function start(): void {
   gsap.registerPlugin(ScrollTrigger);
 
   // 1. Lenis, ticked by GSAP.
-  const lenis = new Lenis({ lerp: 0.09, anchors: { offset: -16 } });
+  // lerp 0.16, not 0.09. At 0.09 the page kept gliding for about 1.2s after
+  // the wheel stopped, which reads as the page lagging behind the hand rather
+  // than as smoothness. 0.16 settles in about half that and still glides.
+  const lenis = new Lenis({ lerp: 0.16, anchors: { offset: -16 } });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);

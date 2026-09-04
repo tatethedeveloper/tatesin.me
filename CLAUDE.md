@@ -73,6 +73,21 @@ size.
   hold hex copies of four of them because a WebGL/canvas context cannot read CSS.
   `--muted` is never used below 24px (3.6:1 on the canvas) and there is no orange
   button (white on orange is 3.5:1); the plan explains both.
+- `src/scripts/motion.ts` (Lenis + GSAP, ~50kB gz) loads after `load` + idle from
+  `index.astro`, not eagerly: nothing above the fold depends on it. Keep it that way.
+- **Frame budget on the hero.** Three things animate there at once, so each keeps to a
+  rule. Breaking any one of them took the hero from 60fps to 20fps before (4 Sep 2026):
+  1. `structure-scene.ts` has **one** rAF loop and renders **at most once per frame**.
+     Everything — field drift, pointer tilt, drag, hover, scroll — marks the scene dirty
+     and lets `tick()` draw it. Never call `renderer.render` from an event handler or
+     add a second loop; two renders in one frame is exactly the bug that was fixed.
+  2. The hover raycast runs once per frame, not once per pointer event.
+  3. `dot-bloom.ts` draws at **1 device pixel per CSS pixel**, not `devicePixelRatio`.
+     A full-viewport canvas at DPR 2 is 5 megapixels to re-raster every frame. It also
+     draws its own edge fade — do not put a CSS `mask-image` back on an animating
+     full-screen canvas, which forces a compositing layer to be re-blended per frame.
+  Measure before and after with a rAF frame-time sampler at `deviceScaleFactor: 2`;
+  at DPR 1 every one of these problems is invisible.
 - Everything Tate still has to supply is marked `TODO(tate)` in source (`grep -rn "TODO(tate)" src`).
 
 # Portfolio site — Tate Sinclair

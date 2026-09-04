@@ -31,10 +31,9 @@ const { gap = 26, speed = 1, class: cls } = Astro.props;
     pointer-events: none;
     /* The dots are drawn in this colour. */
     color: var(--ink);
-    /* Fades out towards the edges, so the field never ends on a hard line
-       against the section below it. */
-    -webkit-mask-image: radial-gradient(125% 105% at 50% 45%, #000 30%, transparent 100%);
-    mask-image: radial-gradient(125% 105% at 50% 45%, #000 30%, transparent 100%);
+    /* The edge fade is drawn into the canvas, not masked over it: a mask on
+       an animating full-screen canvas is a compositing layer re-blended every
+       frame. See scripts/dot-bloom.ts. */
   }
   .bloom canvas {
     display: block;
