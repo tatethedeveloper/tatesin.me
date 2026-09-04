@@ -28,6 +28,14 @@ size.
 
 - `npm run dev` / `npm run build` / `npm run preview` (preview serves `dist/` on :4321)
 - `npx astro check` for types across `.astro` files (`@astrojs/check` is a dev dependency)
+- After `npm install` adds or updates a dependency, regenerate the lock file with the npm
+  version CI actually runs (Node 22's bundled npm, currently 10.x — the local machine may
+  have a newer one), then verify: `rm -rf node_modules && npx -y npm@10 ci`. A lock file
+  written by a newer npm can omit optional platform packages (seen: `@emnapi/core` /
+  `@emnapi/runtime`, pulled in by a wasm32 fallback of a Shiki/markdown native binding)
+  that an older npm's `npm ci` insists on — it fails on GitHub's runner with "Missing: ...
+  from lock file" while working fine locally. This has recurred (see git log on
+  `package-lock.json`); regenerating with npm 10 is the fix each time.
 - Playwright CLI is configured in `.playwright/cli.config.json` (Chromium, isolated).
   `playwright-cli open http://localhost:4321/`, then `resize`, `screenshot`, `press Tab`, `eval`.
   Reduced motion: open a session with a config whose `contextOptions` has `reducedMotion: "reduce"`.
