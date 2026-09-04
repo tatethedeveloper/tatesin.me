@@ -106,7 +106,7 @@ This file is the brief and the working agreement for this repo. Read it fully be
 
 ## 1. Who this is for
 
-**Tate Sinclair — software engineer.** Early career. Based in Scotland.
+**Tate Sinclair — software engineer.** Apprentice. Based in Scotland.
 
 The honest situation, which shapes everything below: Tate does not yet have a body of shipped projects. The site is being built *before* the work, not after it. Do not paper over this. A portfolio that pretends to a career that hasn't happened yet is transparent to anyone hiring, and it's the single most common failure mode of an early-career portfolio.
 
@@ -306,7 +306,7 @@ Case study pages: problem, approach, what was hard, what he'd do differently. Th
 
 Write it in Tate's voice: plain, direct, first person, sentence case. No "passionate about leveraging cutting-edge technologies". No "I turn coffee into code". No third-person self-description.
 
-Being early-career is a fact, not an apology. Write it plainly and move on. Confidence about direction reads better than either false seniority or self-deprecation.
+Being an apprentice is a fact, not an apology. Write it plainly and move on. Confidence about direction reads better than either false seniority or self-deprecation.
 
 Every button says what happens. Errors say what went wrong and how to fix it. The 404 page should be in the site's voice and give the person somewhere to go.
 
