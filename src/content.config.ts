@@ -17,6 +17,8 @@ const projects = defineCollection({
       featured: z.boolean().default(false),
       /** Seed content, not real work. Renders a visible mark on the site. */
       placeholder: z.boolean().default(false),
+      /** Real work, the one being built right now. Renders a mark saying so. */
+      current: z.boolean().default(false),
     }),
 });
 

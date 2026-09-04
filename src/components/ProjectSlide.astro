@@ -16,7 +16,7 @@ interface Props {
   total: number;
 }
 const { project, index, total } = Astro.props;
-const { title, summary, status, role, stack, year, placeholder, cover } = project.data;
+const { title, summary, status, role, stack, year, placeholder, current, cover } = project.data;
 const href = `/projects/${project.id}/`;
 ---
 
@@ -40,6 +40,7 @@ const href = `/projects/${project.id}/`;
       <span class="mark" aria-hidden="true"></span>
       {statusLabel[status]}{status === 'building' ? ' now' : ''}
       {placeholder && <span class="badge">Placeholder project</span>}
+      {current && <span class="badge">Current project</span>}
     </span>
 
     <span class="display-sm name">{title}</span>

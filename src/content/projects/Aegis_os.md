@@ -1,5 +1,5 @@
 ---
-placeholder: true
+current: true
 title: Aegis Operating System
 summary: ""
 status: building

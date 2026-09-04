@@ -10,7 +10,7 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { title, summary, status, role, stack, year, repo, demo, placeholder, cover } = project.data;
+const { title, summary, status, role, stack, year, repo, demo, placeholder, current, cover } = project.data;
 const { Content } = await render(project);
 ---
 
@@ -22,6 +22,7 @@ const { Content } = await render(project);
         <span class="mark" aria-hidden="true"></span>
         {statusLabel[status]}{status === 'building' ? ' now' : ''}
         {placeholder && <span class="badge">Placeholder project</span>}
+        {current && <span class="badge">Current project</span>}
       </p>
       <h1 class="display-lg">{title}</h1>
       {summary && <p class="display-sm measure body">{summary}</p>}
