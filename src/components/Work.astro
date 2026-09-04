@@ -186,20 +186,15 @@ const total = sorted.length;
     cursor: pointer;
     transition:
       border-color var(--dur) var(--ease-out),
-      color var(--dur) var(--ease-out),
-      opacity var(--dur) var(--ease-out);
-  }
-  .step[disabled] {
-    opacity: 0.35;
-    cursor: default;
+      color var(--dur) var(--ease-out);
   }
   @media (hover: hover) and (pointer: fine) {
-    .step:not([disabled]):hover {
+    .step:hover {
       border-color: var(--pulse);
       color: var(--pulse);
     }
   }
-  .step:active:not([disabled]) {
+  .step:active {
     transform: scale(0.94);
   }
   /* Same reasoning as the rail: the buttons need script to do anything. */

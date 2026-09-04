@@ -5,7 +5,8 @@
  * a usable gallery on touch and with a scrollbar. Script adds the things that
  * make it feel like one thing you move through: previous/next, a rail of
  * project names, arrow keys, a live position readout, and dimming of the
- * slides either side of the one being read.
+ * slides either side of the one being read. It is a loop — step past the last
+ * slide and it comes back to the first.
  *
  * All of it is response to input, not ambient motion, so it runs under
  * prefers-reduced-motion too — only the smooth scrolling is dropped.
@@ -49,13 +50,20 @@ export function initGallery(): void {
     if (position) position.textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
   };
 
-  // The buttons follow the scroll extent, not the index: on a wide screen the
-  // last two or three slides share the view, so there is nothing left to move
-  // to well before the last slide is the leading one.
-  const updateEdges = (): void => {
-    const max = track.scrollWidth - track.clientWidth;
-    if (prev) prev.disabled = track.scrollLeft <= 1;
-    if (next) next.disabled = track.scrollLeft >= max - 1;
+  // Ends are read from the scroll extent, not from the index: on a wide screen
+  // the last two or three slides share the view, so the track runs out well
+  // before the last slide is the leading one.
+  const maxScroll = (): number => track.scrollWidth - track.clientWidth;
+  const atStart = (): boolean => track.scrollLeft <= 1;
+  const atEnd = (): boolean => track.scrollLeft >= maxScroll() - 1;
+
+  // The gallery is a loop: step off either end and it comes round again. Only
+  // when there is somewhere to come round from — if every slide already fits,
+  // wrapping would be a control that does nothing.
+  const step = (dir: 1 | -1): void => {
+    const wraps = maxScroll() > 1;
+    if (dir === 1) goTo(wraps && atEnd() ? 0 : current + 1);
+    else goTo(wraps && atStart() ? slides.length - 1 : current - 1);
   };
 
   // The current slide is whichever one sits nearest the track's start edge.
@@ -85,19 +93,18 @@ export function initGallery(): void {
       requestAnimationFrame(() => {
         queued = false;
         setCurrent(nearest());
-        updateEdges();
       });
     },
     { passive: true },
   );
 
-  prev?.addEventListener('click', () => goTo(current - 1));
-  next?.addEventListener('click', () => goTo(current + 1));
+  prev?.addEventListener('click', () => step(-1));
+  next?.addEventListener('click', () => step(1));
   rail.forEach((b, i) => b.addEventListener('click', () => goTo(i)));
 
   track.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'ArrowRight') goTo(current + 1);
-    else if (e.key === 'ArrowLeft') goTo(current - 1);
+    if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'ArrowLeft') step(-1);
     else if (e.key === 'Home') goTo(0);
     else if (e.key === 'End') goTo(slides.length - 1);
     else return;
@@ -123,9 +130,6 @@ export function initGallery(): void {
     { passive: true },
   );
 
-  window.addEventListener('resize', updateEdges, { passive: true });
-
   // Initial state.
   slides[0].classList.add('current');
-  updateEdges();
 }
