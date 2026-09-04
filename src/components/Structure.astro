@@ -67,7 +67,7 @@ const data = {
       <span>This site's own history will be drawn here once it has one.</span>
     ) : (
       <span>
-        This is the site's own history: {count === 1 ? 'one commit' : `${count} commits`} since {since}, one strut each.
+        The site's own history, built as it is written: {count === 1 ? 'one commit' : `${count} commits`} since {since}, one floor each.
       </span>
     )
   }
@@ -81,6 +81,7 @@ const data = {
     position: relative;
     width: 100%;
     height: 100%;
+    min-height: 0;
     touch-action: pan-y;
   }
   .fallback {
@@ -118,7 +119,16 @@ const data = {
   .caption {
     display: grid;
     gap: 2px;
-    max-width: 38ch;
+    max-width: 40ch;
+    justify-self: end;
+    text-align: right;
+    margin-top: 20px;
+  }
+  @media (max-width: 1023px) {
+    .caption {
+      justify-self: start;
+      text-align: left;
+    }
   }
 </style>
 

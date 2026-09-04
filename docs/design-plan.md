@@ -18,9 +18,19 @@ Nothing on the page claims more than the content behind it.
 ## The one bold thing: the structure
 
 The v1 idea survives because it is the only 3D object this site can honestly
-own: a lattice grown from this repository's own commit history, one strut per
-commit, deterministic (`src/lib/lattice.ts`). In v2 it stops being a diagram
-beside the headline and becomes the centrepiece:
+own: a structure grown from this repository's own commit history,
+deterministic (`src/lib/lattice.ts`). In v2 it stops being a diagram beside
+the headline and becomes the centrepiece.
+
+**The growth rule was replaced after looking at it.** v1 added one strut per
+commit on a cubic lattice. Rendered at this repository's size that drew a few
+sprawling arms — a scribble, which is exactly the test v1's own plan set for
+throwing the rule away. The rule is now a tower: each commit adds a floor,
+being a square ring of four beams plus four columns rising from the floor
+below, with the twist and taper of each floor fixed by a hash of its commit.
+Fourteen commits draw a hundred-odd struts that read as an engineered
+structure, and the tower visibly grows as Tate works. The caption states the
+mapping plainly ("14 commits since 2 Sept 2026, one floor each").
 
 - It fills the hero, luminous on a deep ground, and assembles strut by strut
   on load. That assembly is the single self-playing animation on the page.

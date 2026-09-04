@@ -43,7 +43,7 @@ export interface StructureData {
   commits: { h: string; s: string; d: string }[];
 }
 
-const GROUND = new Color('#0a0f1e');
+const GROUND = new Color('#0b1224');
 const STRUT_COLOR = new Color('#c9cfdd');
 const NODE_COLOR = new Color('#ede9e3');
 const PULSE = new Color('#ffb238');

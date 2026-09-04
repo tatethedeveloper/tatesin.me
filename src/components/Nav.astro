@@ -92,14 +92,22 @@ const isHome = Astro.url.pathname === '/';
         if (a.dataset.navLink === id) a.setAttribute('aria-current', 'true');
         else a.removeAttribute('aria-current');
       });
+    const hero = document.getElementById('hero');
+    const active = new Set<string>();
     const io = new IntersectionObserver(
       (entries) => {
-        const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (hit) set(hit.target.id);
-        else if (window.scrollY < window.innerHeight * 0.5) set(null);
+        for (const e of entries) {
+          if (e.isIntersecting) active.add(e.target.id);
+          else active.delete(e.target.id);
+        }
+        // The hero owns the top of the page; nothing is current while it is
+        // the thing being read.
+        if (active.has('hero') || active.size === 0) set(null);
+        else set(sections.find((s) => active.has(s.id))?.id ?? null);
       },
-      { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.01] },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
     );
     sections.forEach((s) => io.observe(s));
+    if (hero) io.observe(hero);
   }
 </script>
