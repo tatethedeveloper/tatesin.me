@@ -6,7 +6,6 @@ const isHome = Astro.url.pathname === '/';
 <header class="nav" data-nav>
   <div class="wrap bar">
     <a class="brand" href="/">
-      <span class="node" aria-hidden="true"></span>
       {site.name}
     </a>
     <nav aria-label="Primary">
@@ -50,18 +49,6 @@ const isHome = Astro.url.pathname === '/';
     font-weight: 500;
     line-height: 1.4;
   }
-  /* The wordmark's one touch of the accent: a node, not the letters. Orange
-     text on the canvas is 3.3:1, under AA; a 10px square is not text. */
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .node {
-    width: 10px;
-    height: 10px;
-    background: var(--primary);
-  }
   nav ul {
     display: flex;
     gap: 28px;
@@ -102,19 +89,12 @@ const isHome = Astro.url.pathname === '/';
     nav ul {
       gap: 16px;
     }
-    .brand {
-      gap: 8px;
-    }
   }
-  /* Under 360 the name and three links do not share a line; the node stands
-     in for the name, which the page's h1 says anyway. */
+  /* Under 360 the name and three links do not share a line; the page's own
+     h1 already says who this is, so the wordmark drops here. */
   @media (max-width: 359px) {
     .brand {
-      font-size: 0;
-    }
-    .node {
-      width: 12px;
-      height: 12px;
+      display: none;
     }
   }
 </style>
