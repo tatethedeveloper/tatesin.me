@@ -8,6 +8,7 @@ stack: [Rust]
 year: 2026
 featured: true
 repo: "https://github.com/tatethedeveloper/Aegis_os.git"
+cover: "./Operating_Screen.png"
 ---
 
 ## Problem
