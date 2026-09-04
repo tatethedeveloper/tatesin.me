@@ -4,9 +4,10 @@
  *  1. Lenis smooth scroll, ticked by GSAP so ScrollTrigger and Lenis agree
  *     on every frame (the integration Lenis documents).
  *  2. The hero intro itself is CSS (Hero.astro), so it starts at first paint.
- *  3. Scroll: the statement's words brighten in reading order; each project
- *     panel recedes (scales down, dims) as the next slides over it; project
- *     visuals uncover and drift; display headings rise once as they arrive.
+ *  3. Scroll: the statement's words brighten in reading order; project images
+ *     uncover as they arrive; display headings rise once as they arrive.
+ *     The work gallery's own behaviour lives in scripts/gallery.ts, because
+ *     it answers input rather than scroll position.
  *  4. The nav hides on scroll down and returns on scroll up.
  *
  * Skipped entirely under prefers-reduced-motion; CSS shows finished states.
@@ -82,33 +83,8 @@ export function start(): void {
     });
   }
 
-  // 3b. The stack. Each panel recedes while the next one covers it.
-  const panels = gsap.utils.toArray<HTMLElement>('[data-panel]');
-  const wide = window.matchMedia('(min-width: 1024px)').matches;
-  if (wide) {
-    panels.forEach((panel, i) => {
-      const next = panels[i + 1];
-      if (!next) return;
-      gsap.to(panel, {
-        scale: 0.94,
-        opacity: 0.45,
-        transformOrigin: 'center top',
-        ease: 'none',
-        scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
-      });
-    });
-  }
-
-  // 3c. Project visuals: uncover once, then drift a little with scroll.
+  // 3b. Project images uncover once, from the bottom, as they arrive.
   gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
-    ScrollTrigger.create({ trigger: el, start: 'top 80%', once: true, onEnter: () => el.classList.add('in') });
-    const inner = el.firstElementChild as HTMLElement | null;
-    if (inner && wide) {
-      gsap.fromTo(
-        inner,
-        { yPercent: 6 },
-        { yPercent: -6, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } },
-      );
-    }
+    ScrollTrigger.create({ trigger: el, start: 'top 90%', once: true, onEnter: () => el.classList.add('in') });
   });
 }

@@ -1,0 +1,190 @@
+---
+/**
+ * One project in the work gallery. The whole slide is the link to the case
+ * study: image, status, title, one sentence. Status still changes the slide
+ * itself (the frame and the mark), not just a word.
+ */
+import type { Project } from '../lib/projects';
+import { statusLabel } from '../lib/projects';
+import Placeholder from './Placeholder.astro';
+
+interface Props {
+  project: Project;
+  index: number;
+  total: number;
+}
+const { project, index, total } = Astro.props;
+const { title, summary, status, role, stack, year, placeholder, cover } = project.data;
+const href = `/projects/${project.id}/`;
+---
+
+<li class:list={['slide', status]} data-slide data-index={index} id={`slide-${index}`}>
+  <a class="face" href={href} aria-describedby={`slide-sum-${index}`}>
+    <span class="visual" data-reveal>
+      {
+        cover ? (
+          <img src={cover.src} width={cover.width} height={cover.height} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <Placeholder label="PROJECT SCREENSHOT" block />
+        )
+      }
+    </span>
+
+    <span class="status">
+      <span class="mark" aria-hidden="true"></span>
+      {statusLabel[status]}{status === 'building' ? ' now' : ''}
+      {placeholder && <span class="ph-mark mono">Placeholder project</span>}
+    </span>
+
+    <span class="h2 name">{title}</span>
+    <span class="summary" id={`slide-sum-${index}`}>{summary}</span>
+
+    <span class="mono meta">
+      <span>{year}</span>
+      <span>{role}</span>
+      {stack.slice(0, 3).map((s) => <span>{s}</span>)}
+    </span>
+
+    <span class="go mono">
+      <span class="go-label">Open the case study</span>
+      <span class="count">{String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}</span>
+    </span>
+  </a>
+</li>
+
+<style>
+  .slide {
+    flex: 0 0 min(84vw, 440px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  @media (min-width: 768px) {
+    .slide {
+      flex-basis: min(52vw, 620px);
+    }
+  }
+  .face {
+    display: grid;
+    grid-template-rows: auto auto auto auto auto 1fr;
+    gap: 14px;
+    height: 100%;
+    padding: 16px 16px 20px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    text-decoration: none;
+    transition:
+      border-color var(--dur) var(--ease-out),
+      background-color var(--dur) var(--ease-out),
+      transform 260ms var(--ease-out);
+  }
+  .planned .face {
+    background: transparent;
+    border-style: dashed;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .face:hover {
+      border-color: var(--pulse);
+      transform: translateY(-4px);
+    }
+    .face:hover .go-label {
+      color: var(--pulse);
+    }
+    .face:hover .visual :global(img) {
+      transform: scale(1.03);
+    }
+  }
+  .visual {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background: color-mix(in srgb, var(--ground) 60%, transparent);
+  }
+  .visual :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 500ms var(--ease-out);
+  }
+  .visual :global(.ph) {
+    height: 100%;
+  }
+  /* With script and motion the image uncovers from the bottom on arrival. */
+  :global(html.js:not(.reduced)) .visual {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 800ms var(--ease-out);
+  }
+  :global(html.js:not(.reduced)) .visual.in {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--text-small);
+    font-weight: 500;
+  }
+  .mark {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border: 1px solid var(--bone);
+  }
+  .building .mark {
+    background: var(--pulse);
+    border-color: var(--pulse);
+  }
+  .shipped .mark {
+    background: var(--bone);
+  }
+  .planned .mark {
+    border-style: dashed;
+    border-color: var(--mist);
+  }
+  .planned .status {
+    color: var(--mist);
+  }
+  .building .status {
+    color: var(--pulse);
+  }
+  .ph-mark {
+    padding: 2px 8px;
+    border: 1px dashed var(--pulse);
+    color: var(--pulse);
+    font-weight: 400;
+  }
+
+  .name {
+    display: block;
+  }
+  .planned .name {
+    color: var(--mist);
+  }
+  .summary {
+    display: block;
+    max-width: 42ch;
+    color: var(--mist);
+    font-size: var(--text-small);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    color: var(--mist);
+  }
+  .go {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 4px;
+    border-top: 1px solid var(--line);
+    color: var(--bone);
+  }
+  .go-label {
+    transition: color var(--dur) var(--ease-out);
+  }
+  .count {
+    color: var(--mist);
+  }
+</style>

@@ -35,9 +35,14 @@ placeholders, quality floor, budgets) still applies. The plan is
   `src/scripts/structure-scene.ts` draw from the same struts, so they are the same drawing.
   CI checks out with `fetch-depth: 0` for this reason.
 - `src/scripts/motion.ts` owns scroll behaviour: Lenis ticked by GSAP, ScrollTrigger for
-  the statement words, the receding stack, visual reveals and rising headings, and the
-  hide-on-scroll nav. The hero intro is CSS keyframes in `Hero.astro`. All of it is
-  skipped under `prefers-reduced-motion`; CSS shows the finished state instead.
+  the statement words, project image reveals and rising headings, and the hide-on-scroll
+  nav. `src/scripts/gallery.ts` owns the work gallery — a horizontal snapping track of
+  project slides (`Work.astro` + `ProjectSlide.astro`) with previous/next, a rail of
+  project names, arrow keys and a position readout. The track scrolls natively, so it
+  still works with no JS; the controls only appear once the script marks it ready. The
+  hero intro is CSS keyframes in `Hero.astro`. Scroll motion is skipped entirely under
+  `prefers-reduced-motion` (CSS shows the finished state instead); the gallery still
+  works there, it just moves instantly.
 - The scene's field (the drifting point ground under the structure) is native Three.js
   in `structure-scene.ts`; Vanta.js was evaluated and not bundled (see design plan).
 - `src/content/projects/*.md` is the typed collection (`src/content.config.ts`). Adding a

@@ -1,6 +1,11 @@
 ---
+/**
+ * Work, as a gallery you move through: one project at a time, each showing
+ * its picture, its name and a sentence, and each one a link to its case
+ * study. Status still leads, so a planned thing never reads as a shipped one.
+ */
 import { getProjects, statusGroups } from '../lib/projects';
-import ProjectPanel from './ProjectPanel.astro';
+import ProjectSlide from './ProjectSlide.astro';
 import { site } from '../lib/site';
 
 const projects = await getProjects();
@@ -15,32 +20,65 @@ const describe = () => {
   if (counts[2]) parts.push(`${counts[2]} shipped`);
   return parts.join(', ');
 };
+const total = sorted.length;
 ---
 
 <section class="work" id="work" aria-labelledby="work-title">
   <div class="wrap head">
     <h2 class="display" id="work-title"><span class="mask"><span data-rise>Work</span></span></h2>
     {
-      projects.length === 0 ? (
+      total === 0 ? (
         <p class="lede measure mist">Nothing here yet. The first thing I build goes at the top.</p>
       ) : (
         <p class="lede measure mist">
-          {projects.length === 1 ? 'One thing' : `${projects.length} things`}, in the order they matter: {describe()}. Nothing is shown as done until it is.
+          {total === 1 ? 'One thing' : `${total} things`}, in the order they matter: {describe()}. Nothing is shown as
+          done until it is.
         </p>
       )
     }
   </div>
+
   {
-    projects.length > 0 && (
-      <div class="stack">
-        {sorted.map((p, i) => (
-          <ProjectPanel project={p} index={i} total={sorted.length} />
-        ))}
+    total > 0 && (
+      <div class="gallery" data-gallery>
+        <div class="wrap bar">
+          <ul class="rail">
+            {sorted.map((p, i) => (
+              <li>
+                <button type="button" class:list={['rail-item', { on: i === 0 }]} data-goto aria-current={i === 0 ? 'true' : 'false'}>
+                  {p.data.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div class="controls">
+            <p class="mono position" data-position aria-live="polite">
+              01 / {String(total).padStart(2, '0')}
+            </p>
+            <button type="button" class="step" data-prev aria-label="Previous project">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M15 4 7 12l8 8" />
+              </svg>
+            </button>
+            <button type="button" class="step" data-next aria-label="Next project">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="m9 4 8 8-8 8" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <ul class="track" data-track tabindex="0" role="group" aria-label="Projects, use the arrow keys to move between them">
+          {sorted.map((p, i) => (
+            <ProjectSlide project={p} index={i} total={total} />
+          ))}
+        </ul>
       </div>
     )
   }
+
   {
-    projects.length === 0 && (
+    total === 0 && (
       <p class="wrap small mist">
         Until then, the work in progress is on <a href={site.repo}>GitHub</a>.
       </p>
@@ -49,10 +87,13 @@ const describe = () => {
 </section>
 
 <style>
+  .work {
+    padding-bottom: clamp(8px, 2vw, 24px);
+  }
   .head {
     display: grid;
     gap: 24px;
-    padding-block: var(--section) clamp(32px, 5vw, 56px);
+    padding-block: var(--section) clamp(28px, 4vw, 44px);
   }
   @media (min-width: 1024px) {
     /* Heading and the summary share one line of the grid: the summary sits in
@@ -71,7 +112,136 @@ const describe = () => {
       padding-bottom: 0.6em;
     }
   }
-  .stack {
-    position: relative;
+
+  /* The bar above the track: names on the left, position and steps on the
+     right. It is the map of the gallery, so it comes before the gallery. */
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0;
+  }
+  .rail-item {
+    padding: 4px 0;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    color: var(--mist);
+    font-size: var(--text-small);
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      color var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out);
+  }
+  .rail-item.on {
+    color: var(--bone);
+    border-bottom-color: var(--pulse);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .rail-item:hover {
+      color: var(--bone);
+    }
+  }
+  /* Without script the rail cannot move the track, so it is not offered. */
+  .rail {
+    display: none;
+  }
+  /* Below 640 the names would take two rows of their own; the counter and
+     the arrows carry the gallery there, and the track swipes. */
+  @media (min-width: 640px) {
+    :global(html.js) .gallery.ready .rail {
+      display: flex;
+    }
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .position {
+    color: var(--mist);
+    min-width: 6ch;
+  }
+  .step {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: none;
+    color: var(--bone);
+    cursor: pointer;
+    transition:
+      border-color var(--dur) var(--ease-out),
+      color var(--dur) var(--ease-out),
+      opacity var(--dur) var(--ease-out);
+  }
+  .step[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .step:not([disabled]):hover {
+      border-color: var(--pulse);
+      color: var(--pulse);
+    }
+  }
+  .step:active:not([disabled]) {
+    transform: scale(0.94);
+  }
+  /* Same reasoning as the rail: the buttons need script to do anything. */
+  .controls {
+    display: none;
+  }
+  :global(html.js) .gallery.ready .controls {
+    display: flex;
+  }
+
+  .track {
+    display: flex;
+    gap: 20px;
+    margin: 0;
+    padding-block: 28px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    /* Slides align to the page margin, not to the viewport edge. */
+    --gutter: max(var(--margin), calc((100vw - var(--max-w)) / 2 + var(--margin)));
+    padding-inline: var(--gutter);
+    scroll-padding-left: var(--gutter);
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  :global(html.js) .gallery.ready .track {
+    scrollbar-width: none;
+  }
+  :global(html.js) .gallery.ready .track::-webkit-scrollbar {
+    display: none;
+  }
+  .track:focus-visible {
+    outline-offset: -2px;
+  }
+  /* The one you are reading is at full strength; its neighbours step back. */
+  :global(html.js) .gallery.ready .track > :global(.slide) {
+    opacity: 0.5;
+    transition: opacity 300ms var(--ease-out);
+  }
+  :global(html.js) .gallery.ready .track > :global(.slide.current),
+  :global(html.js) .gallery.ready .track > :global(.slide:hover),
+  :global(html.js) .gallery.ready .track > :global(.slide:focus-within) {
+    opacity: 1;
   }
 </style>
