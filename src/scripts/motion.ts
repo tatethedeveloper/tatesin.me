@@ -1,50 +1,108 @@
 /**
- * The page's scroll behaviour. Three things, each carrying meaning:
- *  1. Smooth scroll (Lenis) on fine-pointer devices, so the camera and the
- *     sticky stack move at a rate the eye can follow.
- *  2. The statement's words brighten in reading order with scroll progress.
- *  3. Each project visual reveals with a clip as its panel arrives.
- * Everything here is skipped under prefers-reduced-motion; the CSS then shows
- * the finished state of each.
+ * The page's motion, on GSAP + ScrollTrigger with Lenis driving scroll.
+ *
+ *  1. Lenis smooth scroll, ticked by GSAP so ScrollTrigger and Lenis agree
+ *     on every frame (the integration Lenis documents).
+ *  2. The hero intro itself is CSS (Hero.astro), so it starts at first paint.
+ *  3. Scroll: the statement's words brighten in reading order; each project
+ *     panel recedes (scales down, dims) as the next slides over it; project
+ *     visuals uncover and drift; display headings rise once as they arrive.
+ *  4. The nav hides on scroll down and returns on scroll up.
+ *
+ * Skipped entirely under prefers-reduced-motion; CSS shows finished states.
  */
-import { scroll, inView } from 'motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+
+const EASE = 'expo.out';
 
 export function start(): void {
   const root = document.documentElement;
   if (root.classList.contains('reduced')) return;
+  gsap.registerPlugin(ScrollTrigger);
 
-  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (fine) {
-    import('lenis').then(({ default: Lenis }) => {
-      const lenis = new Lenis({ lerp: 0.09, anchors: { offset: -16 } });
-      const raf = (t: number) => {
-        lenis.raf(t);
-        requestAnimationFrame(raf);
-      };
-      requestAnimationFrame(raf);
+  // 1. Lenis, ticked by GSAP.
+  const lenis = new Lenis({ lerp: 0.09, anchors: { offset: -16 } });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((t) => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  // 4. Nav direction.
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  if (nav) {
+    let hidden = false;
+    lenis.on('scroll', ({ direction, scroll }: { direction: number; scroll: number }) => {
+      const shouldHide = direction === 1 && scroll > 120;
+      if (shouldHide === hidden) return;
+      hidden = shouldHide;
+      gsap.to(nav, { yPercent: hidden ? -100 : 0, duration: 0.4, ease: EASE, overwrite: true });
     });
   }
 
+  // 2. The hero intro is CSS keyframes (see Hero.astro) so it starts at first
+  // paint and never depends on this module.
+
+  // Display headings elsewhere rise once, the same way, when they arrive.
+  gsap.utils.toArray<HTMLElement>('[data-rise]').forEach((el) => {
+    gsap.fromTo(
+      el,
+      { yPercent: 110 },
+      {
+        yPercent: 0,
+        duration: 1,
+        ease: EASE,
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+      },
+    );
+  });
+
+  // 3a. Statement words.
   const statement = document.querySelector<HTMLElement>('[data-words]');
   if (statement) {
-    const words = [...statement.querySelectorAll<HTMLElement>('.w')];
+    const words = statement.querySelectorAll<HTMLElement>('.w');
     let lit = -1;
-    scroll(
-      (p: number) => {
-        const count = Math.round(p * words.length);
+    ScrollTrigger.create({
+      trigger: statement,
+      start: 'top 85%',
+      end: 'bottom 45%',
+      scrub: true,
+      onUpdate: (self) => {
+        const count = Math.round(self.progress * words.length);
         if (count === lit) return;
         lit = count;
         words.forEach((w, i) => w.classList.toggle('on', i < count));
       },
-      { target: statement, offset: ['start 85%', 'end 45%'] },
-    );
+    });
   }
 
-  inView(
-    '[data-reveal]',
-    (el) => {
-      el.classList.add('in');
-    },
-    { amount: 0.35 },
-  );
+  // 3b. The stack. Each panel recedes while the next one covers it.
+  const panels = gsap.utils.toArray<HTMLElement>('[data-panel]');
+  const wide = window.matchMedia('(min-width: 1024px)').matches;
+  if (wide) {
+    panels.forEach((panel, i) => {
+      const next = panels[i + 1];
+      if (!next) return;
+      gsap.to(panel, {
+        scale: 0.94,
+        opacity: 0.45,
+        transformOrigin: 'center top',
+        ease: 'none',
+        scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
+      });
+    });
+  }
+
+  // 3c. Project visuals: uncover once, then drift a little with scroll.
+  gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
+    ScrollTrigger.create({ trigger: el, start: 'top 80%', once: true, onEnter: () => el.classList.add('in') });
+    const inner = el.firstElementChild as HTMLElement | null;
+    if (inner && wide) {
+      gsap.fromTo(
+        inner,
+        { yPercent: 6 },
+        { yPercent: -6, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } },
+      );
+    }
+  });
 }

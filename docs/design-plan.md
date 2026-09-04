@@ -138,20 +138,37 @@ data file (`src/lib/site.ts`, `src/lib/skills.ts`) or one markdown file.
 
 ## Motion
 
-- Load: the structure assembles (1.4s, each strut ease-out). The headline is
-  static HTML and readable before any script runs.
-- Scroll: the camera on the structure; word-by-word brightening on the
-  statement; the sticky stack in Work; the project visual frame reveals with
-  `clip-path` as it enters. All driven by scroll position through `motion`'s
-  `scroll()`, never a raw scroll listener.
-- Smooth scroll via Lenis on fine-pointer devices only. Off on touch and
-  under reduced motion.
+Stack: **Lenis** for smooth scroll, **GSAP + ScrollTrigger** for everything
+scroll-driven, ticked together the way Lenis documents (`lenis.on('scroll',
+ScrollTrigger.update)`, `gsap.ticker` driving `lenis.raf`). Three.js for the
+one scene. Vanta.js was evaluated and not bundled: it targets Three r134,
+needs the full `THREE` namespace (about 150kB gzipped on top of the scene)
+and a second WebGL context. Its idea, an ambient pointer-reactive field, is
+built natively inside the existing scene instead.
+
+- Load: the headline lines rise out of a mask (CSS keyframes, so it starts at
+  first paint and never waits for a module), lede and button settle after,
+  while the structure assembles strut by strut. The one self-playing sequence.
+- The field: points on a disc at ground level under the structure, joined
+  where near, drifting slowly. It runs only while the hero is on screen and
+  the tab is visible, tilts with the pointer along with the structure, and
+  fades out over the first 60% of the hero's scroll so the page never pays
+  for it once it is gone.
+- Scroll, each carrying meaning: the camera pulls back and rises (the object
+  recedes); statement words brighten in reading order (reading pace); each
+  project panel scales to 0.94 and dims as the next covers it (depth in the
+  stack); project visuals uncover once and drift a few percent (parallax);
+  the three display headings rise out of a mask once as they arrive.
+- The nav hides on scroll down and returns on scroll up.
+- Page transitions: cross-document view transitions, a 320ms fade between
+  home and case studies, CSS only.
 - Responses to the user: nav active state, link underlines, button press
   `scale(0.97)` at 140ms ease-out, copy-email label change, orbit, hover tip.
-- Easing `cubic-bezier(0.23, 1, 0.32, 1)` for entrances; UI under 300ms.
-- Reduced motion: structure renders assembled, statement words all bright,
-  panels stack plainly, no smooth scroll, no clip reveals. Only `transform`
-  and `opacity` are ever animated.
+- Easing: `expo.out` / `cubic-bezier(0.23, 1, 0.32, 1)` for entrances; UI
+  under 300ms; scrubbed motion is linear to the scrollbar.
+- Reduced motion: no smooth scroll, no field, structure renders assembled,
+  words all bright, headings in place, panels stack plainly, no transitions.
+  Only `transform`, `opacity` and `clip-path` are ever animated.
 
 ## Principles
 
@@ -192,6 +209,7 @@ pre-flight and CLAUDE.md §3.
   repo and the brief forbids inventing them. The image slot is an explicit
   `[ADD: PROJECT SCREENSHOT]` frame, styled as a deliberate part of the
   composition rather than a broken image.
-- **Budget.** v1 held JS-before-3D under 30kB. v2 adds Lenis and `motion`
-  (about 22kB gzipped together). Accepted for this direction; the scene is
-  still lazy and on-demand, and the page is readable before any of it loads.
+- **Budget.** v1 held JS-before-3D under 30kB. v2 ships Lenis + GSAP +
+  ScrollTrigger (about 50kB gzipped together), loaded after the HTML. Accepted
+  for this direction; the scene (136kB) is still lazy and on-demand, and the
+  page is readable before any of it loads.

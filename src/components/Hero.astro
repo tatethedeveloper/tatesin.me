@@ -6,11 +6,11 @@ import Structure from './Structure.astro';
 <section class="hero" id="hero" aria-labelledby="hero-title">
   <div class="wrap copy">
     <h1 class="display" id="hero-title">
-      <span class="line">Tate</span>
-      <span class="line">Sinclair</span>
+      <span class="mask"><span class="line">Tate</span></span>
+      <span class="mask"><span class="line">Sinclair</span></span>
     </h1>
-    <p class="lede measure">{site.role} in {site.location}. Early career, building in the open.</p>
-    <a class="button" href="/#work">See what I'm building</a>
+    <p class="lede measure intro">{site.role} in {site.location}. Early career, building in the open.</p>
+    <a class="button intro" href="/#work">See what I'm building</a>
   </div>
   <div class="scene">
     <Structure />
@@ -60,8 +60,51 @@ import Structure from './Structure.astro';
     pointer-events: auto;
     width: fit-content;
   }
+  .mask {
+    display: block;
+    overflow: hidden;
+    /* Room for descenders and the tight line-height. */
+    padding-bottom: 0.06em;
+    margin-bottom: -0.06em;
+  }
   .line {
     display: block;
+  }
+  /* Intro, in CSS so it starts at first paint: lines rise out of their mask
+     while the structure assembles; lede and button follow. Reduced motion
+     collapses every duration to nothing via the global rule. */
+  .line {
+    animation: rise 1.1s var(--ease-out) both;
+  }
+  .mask:nth-child(2) .line {
+    animation-delay: 0.09s;
+  }
+  .intro {
+    animation: settle 0.8s var(--ease-out) both;
+  }
+  .lede.intro {
+    animation-delay: 0.55s;
+  }
+  .button.intro {
+    animation-delay: 0.65s;
+  }
+  @keyframes rise {
+    from {
+      transform: translateY(110%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
   .lede {
     color: var(--mist);

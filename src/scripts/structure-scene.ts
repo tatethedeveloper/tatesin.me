@@ -3,9 +3,14 @@
  * lattice. Loaded lazily by Structure.astro when WebGL is available, the
  * device is not low-powered and the visitor has not asked for reduced motion.
  *
- * Renders on demand. Frames are drawn during the assembly on load, while the
- * pointer tilt settles, while dragging, on hover changes, and on scroll.
- * Otherwise nothing runs, so a background tab costs nothing.
+ * Two layers:
+ *  - The structure itself: rendered on demand (assembly, tilt settling,
+ *    drag, hover, scroll).
+ *  - The field beneath it: a sparse ground of points joined to their near
+ *    neighbours, drifting slowly (the idea is Vanta's NET/dots, built here on
+ *    the same renderer rather than a second Three.js). It runs a light loop
+ *    only while the hero is on screen and the tab is visible, and it fades
+ *    out as the visitor scrolls away, so the page never pays for it.
  */
 import { WebGLRenderer } from 'three/src/renderers/WebGLRenderer.js';
 import { Scene } from 'three/src/scenes/Scene.js';
@@ -22,7 +27,14 @@ import { Quaternion } from 'three/src/math/Quaternion.js';
 import { Matrix4 } from 'three/src/math/Matrix4.js';
 import { Color } from 'three/src/math/Color.js';
 import { AdditiveBlending } from 'three/src/constants.js';
-import { scroll } from 'motion';
+import { Points } from 'three/src/objects/Points.js';
+import { PointsMaterial } from 'three/src/materials/PointsMaterial.js';
+import { LineSegments } from 'three/src/objects/LineSegments.js';
+import { LineBasicMaterial } from 'three/src/materials/LineBasicMaterial.js';
+import { BufferGeometry } from 'three/src/core/BufferGeometry.js';
+import { Float32BufferAttribute } from 'three/src/core/BufferAttribute.js';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 type Vec3 = [number, number, number];
 
@@ -116,8 +128,63 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     nodeMesh.setMatrixAt(k++, m);
   }
 
+  // The field. Points on a disc at ground level, joined where they are near.
+  const FIELD_N = 150;
+  const fieldR = radius * 3.4;
+  const groundY = min.y - 0.35;
+  const base = new Float32Array(FIELD_N * 3);
+  const phase = new Float32Array(FIELD_N);
+  let seed = 1234567;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  for (let i = 0; i < FIELD_N; i++) {
+    const r = fieldR * Math.sqrt(rnd());
+    const a = rnd() * Math.PI * 2;
+    base[i * 3] = centre.x + Math.cos(a) * r;
+    base[i * 3 + 1] = groundY;
+    base[i * 3 + 2] = centre.z + Math.sin(a) * r;
+    phase[i] = rnd() * Math.PI * 2;
+  }
+  const pairs: number[] = [];
+  const linkD = fieldR * 0.26;
+  for (let i = 0; i < FIELD_N; i++) {
+    for (let j = i + 1; j < FIELD_N; j++) {
+      const dx = base[i * 3] - base[j * 3];
+      const dz = base[i * 3 + 2] - base[j * 3 + 2];
+      if (dx * dx + dz * dz < linkD * linkD) pairs.push(i, j);
+    }
+  }
+  const fieldPos = new Float32Array(base);
+  const pointGeo = new BufferGeometry();
+  pointGeo.setAttribute('position', new Float32BufferAttribute(fieldPos, 3));
+  const pointMat = new PointsMaterial({ color: STRUT_COLOR, size: 0.045, transparent: true, opacity: 0.55, depthWrite: false });
+  const points = new Points(pointGeo, pointMat);
+  const linePos = new Float32Array(pairs.length * 3);
+  const lineGeo = new BufferGeometry();
+  lineGeo.setAttribute('position', new Float32BufferAttribute(linePos, 3));
+  const lineMat = new LineBasicMaterial({ color: STRUT_COLOR, transparent: true, opacity: 0.12, depthWrite: false });
+  const lines = new LineSegments(lineGeo, lineMat);
+  const field = new Group();
+  field.add(lines, points);
+  const FIELD_POINT_OPACITY = 0.55;
+  const FIELD_LINE_OPACITY = 0.12;
+  const driftField = (t: number) => {
+    const amp = 0.09;
+    for (let i = 0; i < FIELD_N; i++) {
+      fieldPos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * 0.0006 + phase[i]) * amp;
+    }
+    for (let k = 0; k < pairs.length; k++) {
+      const i = pairs[k];
+      linePos[k * 3] = fieldPos[i * 3];
+      linePos[k * 3 + 1] = fieldPos[i * 3 + 1];
+      linePos[k * 3 + 2] = fieldPos[i * 3 + 2];
+    }
+    pointGeo.attributes.position.needsUpdate = true;
+    lineGeo.attributes.position.needsUpdate = true;
+  };
+  driftField(0);
+
   const group = new Group();
-  group.add(glowMesh, strutMesh, nodeMesh);
+  group.add(field, glowMesh, strutMesh, nodeMesh);
   group.position.copy(centre).negate();
   const rig = new Group();
   rig.add(group);
@@ -153,6 +220,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     rig.rotation.y = BASE_YAW + scrollP * 0.9 + dragYaw;
     fog.near = dist - radius * 0.2;
     fog.far = dist + radius * 2.6;
+    const keep = Math.max(0, 1 - scrollP * 1.6);
+    pointMat.opacity = FIELD_POINT_OPACITY * keep;
+    lineMat.opacity = FIELD_LINE_OPACITY * keep;
+    field.visible = keep > 0;
   };
   let dragYaw = 0;
 
@@ -177,6 +248,7 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   // Render on demand.
   let raf = 0;
   let visible = true;
+  let assembling = true;
   const render = () => {
     raf = 0;
     if (!visible || document.hidden) return;
@@ -184,6 +256,21 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   };
   const requestRender = () => {
     if (!raf) raf = requestAnimationFrame(render);
+  };
+
+  // The field's loop. Runs only while the stage is on screen, the tab is
+  // visible and the field has not faded out. Draws the whole scene, so the
+  // on-demand path is a no-op while this is running.
+  let fieldRaf = 0;
+  const fieldTick = (t: number) => {
+    fieldRaf = 0;
+    if (!visible || document.hidden || !field.visible) return;
+    driftField(t);
+    if (!assembling) renderer.render(scene, camera);
+    fieldRaf = requestAnimationFrame(fieldTick);
+  };
+  const wakeField = () => {
+    if (!fieldRaf && visible && !document.hidden && field.visible) fieldRaf = requestAnimationFrame(fieldTick);
   };
 
   // Assembly: each strut grows from its start node in commit order, staggered
@@ -195,7 +282,6 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   const stagger = 0.6; // share of the total time spent staggering starts
   const each = ASSEMBLE_MS * (1 - stagger);
   let start = 0;
-  let assembling = true;
   const assemble = (t: number) => {
     if (!start) start = t;
     const elapsed = t - start;
@@ -212,7 +298,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
     glowMesh.instanceMatrix.needsUpdate = true;
     renderer.render(scene, camera);
     if (!done) requestAnimationFrame(assemble);
-    else assembling = false;
+    else {
+      assembling = false;
+      wakeField();
+    }
   };
 
   // Pointer tilt: a few degrees toward the cursor, eased. Runs a short loop
@@ -322,24 +411,35 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   canvas.addEventListener('pointercancel', onUp);
   canvas.addEventListener('pointerleave', hideTip);
 
-  // Scroll progress across the hero drives the camera.
-  const stopScroll = scroll(
-    (p: number) => {
-      scrollP = p;
+  // Scroll progress across the hero drives the camera and fades the field.
+  gsap.registerPlugin(ScrollTrigger);
+  const trigger = ScrollTrigger.create({
+    trigger: opts.scrollTarget ?? stage,
+    start: 'top top',
+    end: 'bottom top',
+    scrub: true,
+    onUpdate: (self) => {
+      scrollP = self.progress;
       applyScroll();
       if (!assembling) requestRender();
+      wakeField();
     },
-    opts.scrollTarget ? { target: opts.scrollTarget, offset: ['start start', 'end start'] } : undefined,
-  );
+  });
 
   // Pause when off-screen or the tab is hidden; redraw when back.
   const io = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
-    if (visible) requestRender();
+    if (visible) {
+      requestRender();
+      wakeField();
+    }
   });
   io.observe(stage);
   const onVisibility = () => {
-    if (!document.hidden) requestRender();
+    if (!document.hidden) {
+      requestRender();
+      wakeField();
+    }
   };
   document.addEventListener('visibilitychange', onVisibility);
 
@@ -352,7 +452,8 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
   window.addEventListener(
     'pagehide',
     () => {
-      stopScroll();
+      trigger.kill();
+      if (fieldRaf) cancelAnimationFrame(fieldRaf);
       io.disconnect();
       ro.disconnect();
       if (fine) window.removeEventListener('pointermove', onWindowMove);
@@ -362,6 +463,10 @@ export function mount(stage: HTMLElement, data: StructureData, opts: { scrollTar
       strutMat.dispose();
       glowMat.dispose();
       nodeMat.dispose();
+      pointGeo.dispose();
+      lineGeo.dispose();
+      pointMat.dispose();
+      lineMat.dispose();
       strutMesh.dispose();
       glowMesh.dispose();
       nodeMesh.dispose();

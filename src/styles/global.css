@@ -258,6 +258,31 @@ code {
   transform: none;
 }
 
+/* Masked rise: the heading is hidden below its own box until script reveals it. */
+.mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+[data-rise] {
+  display: block;
+}
+html.js:not(.reduced) [data-rise] {
+  transform: translateY(110%);
+}
+
+/* Cross-document page transitions (home to case study and back). A short
+   fade; browsers without support just navigate. */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-out);
+}
+
 /* Hairline between things. Only ever between two things. */
 .rule {
   border: 0;

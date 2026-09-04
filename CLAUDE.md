@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Repository state
 
 Astro 7 + TypeScript, vanilla CSS, one Three.js island, plus `lenis` (smooth
-scroll) and `motion` (scroll-driven animation). Deploys to GitHub Pages via
+scroll) and `gsap` with ScrollTrigger (scroll-driven animation). Deploys to GitHub Pages via
 `.github/workflows/deploy.yml` on push to `main`; the custom domain is
 `public/CNAME`.
 
@@ -34,9 +34,12 @@ placeholders, quality floor, budgets) still applies. The plan is
   `src/components/Structure.astro` and the lazily loaded scene in
   `src/scripts/structure-scene.ts` draw from the same struts, so they are the same drawing.
   CI checks out with `fetch-depth: 0` for this reason.
-- `src/scripts/motion.ts` owns scroll behaviour: Lenis (fine pointers only), the
-  statement's word-by-word brightening, and the project visual clip reveal. All of it
-  is skipped under `prefers-reduced-motion`; CSS shows the finished state instead.
+- `src/scripts/motion.ts` owns scroll behaviour: Lenis ticked by GSAP, ScrollTrigger for
+  the statement words, the receding stack, visual reveals and rising headings, and the
+  hide-on-scroll nav. The hero intro is CSS keyframes in `Hero.astro`. All of it is
+  skipped under `prefers-reduced-motion`; CSS shows the finished state instead.
+- The scene's field (the drifting point ground under the structure) is native Three.js
+  in `structure-scene.ts`; Vanta.js was evaluated and not bundled (see design plan).
 - `src/content/projects/*.md` is the typed collection (`src/content.config.ts`). Adding a
   project is one file. `placeholder: true` in frontmatter shows a visible mark on the site.
   `src/lib/projects.ts` owns status order and copy.
