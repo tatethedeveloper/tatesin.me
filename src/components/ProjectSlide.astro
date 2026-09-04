@@ -54,14 +54,11 @@ const href = `/projects/${project.id}/`;
 
 <style>
   .slide {
-    flex: 0 0 min(84vw, 440px);
+    /* Width comes from the track, which needs it to size the space after the
+       last slide. */
+    flex: 0 0 var(--slide, min(84vw, 440px));
     scroll-snap-align: start;
     scroll-snap-stop: always;
-  }
-  @media (min-width: 768px) {
-    .slide {
-      flex-basis: min(52vw, 620px);
-    }
   }
   .face {
     display: grid;

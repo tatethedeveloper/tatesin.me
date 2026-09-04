@@ -215,7 +215,14 @@ const total = sorted.length;
     scroll-snap-type: x mandatory;
     /* Slides align to the page margin, not to the viewport edge. */
     --gutter: max(var(--margin), calc((100vw - var(--max-w)) / 2 + var(--margin)));
-    padding-inline: var(--gutter);
+    /* The slide width lives here because the trailing space below is derived
+       from it; the slides themselves read it. */
+    --slide: min(84vw, 440px);
+    padding-left: var(--gutter);
+    /* Enough room past the last slide for it to reach the start edge like any
+       other. Without it the track runs out while the third slide is still the
+       leading one, and the last project can never become the current one. */
+    padding-right: max(var(--gutter), calc(100% - var(--slide) - var(--gutter)));
     scroll-padding-left: var(--gutter);
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
@@ -225,6 +232,11 @@ const total = sorted.length;
   }
   :global(html.js) .gallery.ready .track::-webkit-scrollbar {
     display: none;
+  }
+  @media (min-width: 768px) {
+    .track {
+      --slide: min(52vw, 620px);
+    }
   }
   .track:focus-visible {
     outline-offset: -2px;
