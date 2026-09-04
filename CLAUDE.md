@@ -43,6 +43,12 @@ placeholders, quality floor, budgets) still applies. The plan is
   hero intro is CSS keyframes in `Hero.astro`. Scroll motion is skipped entirely under
   `prefers-reduced-motion` (CSS shows the finished state instead); the gallery still
   works there, it just moves instantly.
+- `src/components/DotBloom.astro` + `src/scripts/dot-bloom.ts` are the dot field behind
+  the work band: a canvas-2d halftone grid whose dots grow and brighten under two layers
+  of drifting value noise. It draws in the host element's `color`, stops when off-screen
+  or when the tab is hidden, and paints a single still frame under
+  `prefers-reduced-motion`. Dot opacity is capped on purpose — a dot is the same hue as
+  the body copy, so a brighter crest under a paragraph would take it below AA.
 - The scene's field (the drifting point ground under the structure) is native Three.js
   in `structure-scene.ts`; Vanta.js was evaluated and not bundled (see design plan).
 - `src/content/projects/*.md` is the typed collection (`src/content.config.ts`). Adding a

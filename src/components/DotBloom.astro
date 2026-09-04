@@ -1,0 +1,67 @@
+---
+/**
+ * A dot-matrix bloom behind a section: faint halftone grid, with patches of
+ * light drifting through it. Decoration, so it is hidden from assistive
+ * technology and takes no pointer input; the section reads exactly the same
+ * with it absent, which is what happens when script does not run.
+ *
+ * Place inside a positioned element. Colour comes from `--dot`, so it stays
+ * with the rest of the palette.
+ */
+interface Props {
+  /** Distance between dots in CSS pixels. Larger is sparser and cheaper. */
+  gap?: number;
+  /** Drift rate; 1 is the reference speed. */
+  speed?: number;
+  class?: string;
+}
+const { gap = 26, speed = 1, class: cls } = Astro.props;
+---
+
+<div class:list={['bloom', cls]} data-bloom data-gap={gap} data-speed={speed} aria-hidden="true">
+  <canvas></canvas>
+</div>
+
+<style>
+  .bloom {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* The dots are drawn in this colour. */
+    color: var(--mist);
+    /* Two masks, intersected: the radial keeps the field off the edges so it
+       never ends on a hard line, and the linear holds it back from the top of
+       the section, where the heading and the summary are. */
+    -webkit-mask-image:
+      radial-gradient(115% 90% at 50% 58%, #000 28%, transparent 100%),
+      linear-gradient(to bottom, transparent 0, #000 var(--bloom-from, 24%));
+    mask-image:
+      radial-gradient(115% 90% at 50% 58%, #000 28%, transparent 100%),
+      linear-gradient(to bottom, transparent 0, #000 var(--bloom-from, 24%));
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  /* The section's text takes proportionally more of the band on a narrow
+     screen, so the field starts lower down there. */
+  @media (max-width: 767px) {
+    .bloom {
+      --bloom-from: 33%;
+    }
+  }
+  .bloom canvas {
+    display: block;
+  }
+</style>
+
+<script>
+  import { dotBloom } from '../scripts/dot-bloom';
+
+  document.querySelectorAll<HTMLElement>('[data-bloom]').forEach((host) => {
+    dotBloom(host, {
+      gap: Number(host.dataset.gap) || undefined,
+      speed: Number(host.dataset.speed) || undefined,
+    });
+  });
+</script>
