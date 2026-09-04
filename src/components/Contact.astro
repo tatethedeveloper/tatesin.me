@@ -45,6 +45,11 @@ import Placeholder from './Placeholder.astro';
   .ways {
     display: grid;
     gap: var(--space-xxl);
+    /* Without this, grid's default stretch makes the shorter "way" match the
+       taller one's height (the email address wraps above its button, so it's
+       the tall one), and its content centres in that extra space instead of
+       sitting flush under its own label. */
+    align-items: start;
   }
   .way {
     display: grid;
