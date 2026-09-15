@@ -1,14 +1,13 @@
 ---
 current: true
-title: Aegis Operating System
+title: Aegis Customer Support
 summary: ""
 status: building
 role: solo
-stack: [Rust]
+stack: [Python, Ollama, OpenAI Whispers]
 year: 2026
 featured: true
 repo: "https://github.com/tatethedeveloper/Aegis_os.git"
-cover: "./Operating_Screen.png"
 ---
 
 ## Problem
